@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Thermal\Thermal.csproj" />
-    <ProjectReference Include="..\GreenPng\GreenPng\GreenPng.csproj" />
+    <ProjectReference Include="..\GreenPng\GreenPng.csproj" />
   </ItemGroup>
 
 </Project>
