@@ -1,0 +1,5 @@
+namespace PanelWork;
+
+public interface IFacade {
+    public void Draw(Graphics graphics, LayoutUnit unit);
+}
