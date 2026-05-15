@@ -1,4 +1,4 @@
-namespace PanelWork;
+namespace PanelWork.Entities;
 
 public static class ComponentRegistry {
     static int index = 0;

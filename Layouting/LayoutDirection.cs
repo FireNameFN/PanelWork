@@ -1,6 +1,7 @@
 using System;
+using PanelWork.Primitives;
 
-namespace PanelWork;
+namespace PanelWork.Layouting;
 
 public readonly struct LayoutDirection {
     public static readonly LayoutDirection Horizontal = new(true);

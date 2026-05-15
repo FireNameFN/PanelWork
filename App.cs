@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using PanelWork.Entities;
 using SDL3;
 using Thermal.Core;
 using Thermal.Extensions;
@@ -7,7 +9,7 @@ using Vortice.Vulkan;
 
 namespace PanelWork;
 
-public sealed class App {
+public sealed class App : IDisposable {
     internal readonly ThPhysicalDevice physicalDevice;
 
     internal readonly ThDevice device;
@@ -93,6 +95,12 @@ public sealed class App {
             foreach(AppWindow window in windows)
                 window.Update();
         }
+    }
+
+    public void Dispose() {
+        SDL.VulkanUnloadLibrary();
+
+        SDL.Quit();
     }
 
     static bool IsPresentationSupported(ThPhysicalDevice physicalDevice, uint queueFamily, VkQueueFlags flags) {

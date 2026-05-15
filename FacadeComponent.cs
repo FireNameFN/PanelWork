@@ -1,3 +1,5 @@
+using PanelWork.Entities;
+
 namespace PanelWork;
 
 public sealed class FacadeComponent : IComponent {

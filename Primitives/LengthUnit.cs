@@ -1,4 +1,4 @@
-namespace PanelWork;
+namespace PanelWork.Primitives;
 
 public enum LengthUnit {
     Pixel,

@@ -1,4 +1,6 @@
-namespace PanelWork;
+using PanelWork.Entities;
+
+namespace PanelWork.Layouting;
 
 public struct LayoutUnit {
     public Entity Entity;

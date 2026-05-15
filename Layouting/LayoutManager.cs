@@ -1,7 +1,8 @@
 using System;
 using System.Numerics;
+using PanelWork.Entities;
 
-namespace PanelWork;
+namespace PanelWork.Layouting;
 
 public sealed class LayoutManager(App app) {
     readonly App app = app;

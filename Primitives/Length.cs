@@ -1,4 +1,4 @@
-namespace PanelWork;
+namespace PanelWork.Primitives;
 
 public readonly struct Length(double value, LengthUnit unit) {
     public double Value { get; } = value;

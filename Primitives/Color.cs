@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace PanelWork;
+namespace PanelWork.Primitives;
 
 public struct Color {
     public float R;

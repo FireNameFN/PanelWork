@@ -1,4 +1,6 @@
 using System;
+using PanelWork.Entities;
+using PanelWork.Layouting;
 using SDL3;
 using Thermal.Core;
 using Thermal.Extensions;
@@ -40,16 +42,16 @@ public sealed class AppWindow {
 
     ThFramebuffer[] framebuffers;
 
-    Graphics graphics;
-
-    public Entity Content { get; set; }
+    readonly Graphics graphics;
 
     readonly LayoutManager layoutManager;
+
+    public Entity Content { get; set; }
 
     public AppWindow(App app) {
         this.app = app;
 
-        handle = SDL.CreateWindow("PanelWork", 1280, 720, SDL.WindowFlags.Resizable);
+        handle = SDL.CreateWindow("PanelWork", 1280, 720, SDL.WindowFlags.Resizable | SDL.WindowFlags.Vulkan);
 
         SDL.VulkanCreateSurface(handle, app.physicalDevice.Instance.Instance, 0, out nint surface);
 

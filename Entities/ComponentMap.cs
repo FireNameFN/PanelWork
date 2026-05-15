@@ -1,4 +1,4 @@
-namespace PanelWork;
+namespace PanelWork.Entities;
 
 public sealed class ComponentMap {
     object[] components = new object[100];

@@ -1,4 +1,4 @@
-namespace PanelWork;
+namespace PanelWork.Primitives;
 
 public readonly struct Side(int left, int right, int top, int bottom) {
     public int Left { get; init; } = left;

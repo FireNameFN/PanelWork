@@ -1,4 +1,4 @@
-namespace PanelWork;
+namespace PanelWork.Entities;
 
 public sealed class EntityManager {
     readonly DataList<int> generations = new(100);
