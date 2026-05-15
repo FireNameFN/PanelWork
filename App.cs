@@ -98,8 +98,6 @@ public sealed class App : IDisposable {
     }
 
     public void Dispose() {
-        SDL.VulkanUnloadLibrary();
-
         SDL.Quit();
     }
 
