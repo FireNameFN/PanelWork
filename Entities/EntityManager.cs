@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace PanelWork.Entities;
 
@@ -23,11 +24,11 @@ public sealed class EntityManager {
         if(ids.Length <= index) {
             int size = index * 2;
 
-            ids = new int[size];
-
             Array.Resize(ref generations, size);
 
-            for(int i = index; i < ids.Length; i++)
+            ids = new int[size];
+
+            for(int i = index; i < size; i++)
                 ids[i] = i + 1;
         }
 
@@ -73,9 +74,6 @@ public sealed class EntityManager {
     public bool TryGetComponent<T>(Entity entity, out T component) where T : class, IComponent {
         component = null;
 
-        if(maps.Length <= T.ComponentId)
-            return false;
-
         if(Deleted(entity))
             return false;
 
@@ -88,9 +86,6 @@ public sealed class EntityManager {
     }
 
     public T GetComponent<T>(Entity entity) where T : class, IComponent {
-        if(maps.Length <= T.ComponentId)
-            return null;
-
         if(!TryGetMap(out ComponentMap<T> map))
             return null;
 
@@ -98,7 +93,14 @@ public sealed class EntityManager {
     }
 
     bool TryGetMap<T>(out ComponentMap<T> map) where T : class, IComponent {
-        object mapObj = maps[T.ComponentId];
+        Unsafe.SkipInit(out map);
+
+        int index = ComponentRegistry.GetIndex<T>();
+
+        if(maps.Length <= index)
+            return false;
+
+        object mapObj = maps[index];
 
         map = (ComponentMap<T>)mapObj;
 
@@ -106,13 +108,15 @@ public sealed class EntityManager {
     }
 
     ComponentMap<T> GetOrCreateMap<T>() where T : class, IComponent {
-        if(maps.Length <= T.ComponentId) {
-            int size = (int)BitOperations.RoundUpToPowerOf2((uint)T.ComponentId + 1);
+        int index = ComponentRegistry.GetIndex<T>();
+
+        if(maps.Length <= index) {
+            int size = (int)BitOperations.RoundUpToPowerOf2((uint)ComponentRegistry.Count);
 
             Array.Resize(ref maps, size);
         }
 
-        ref object mapObj = ref maps[T.ComponentId];
+        ref object mapObj = ref maps[index];
 
         if(mapObj is null) {
             ComponentMap<T> map = new();

@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using PanelWork.Entities;
 using PanelWork.Layouting;
 using SDL3;
@@ -105,8 +104,6 @@ public sealed class AppWindow {
     }
 
     public void Resize() {
-        //app.device.Handle.vkDeviceWaitIdle();
-
         if(framebuffers is not null) {
             colorImageView.Dispose();
 
@@ -117,6 +114,8 @@ public sealed class AppWindow {
 
             foreach(ThImageView imageView in imageViews)
                 imageView.Dispose();
+
+            app.queue.WaitIdle();
         }
 
         SDL.GetWindowSizeInPixels(handle, out int width, out int height);
@@ -145,7 +144,7 @@ public sealed class AppWindow {
         VkResult result = presenter.Acquire(ulong.MaxValue, out uint index);
 
         if(result == VkResult.ErrorOutOfDateKHR) {
-            //Resize();
+            Resize();
 
             return;
         }
@@ -182,13 +181,7 @@ public sealed class AppWindow {
 
         presenter.Present(index);
 
-        long t1 = Stopwatch.GetTimestamp();
-
         fence.Wait();
-
-        long t2 = Stopwatch.GetTimestamp();
-
-        //Console.WriteLine((t2 - t1) * 1000000d / Stopwatch.Frequency);
 
         fence.Reset();
 

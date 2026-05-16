@@ -31,7 +31,7 @@ public sealed class LayoutManager(App app) {
 
         long t2 = Stopwatch.GetTimestamp();
 
-        //Console.WriteLine((t2 - t1) * 1000000d / Stopwatch.Frequency);
+        Console.WriteLine((t2 - t1) * 1000000d / Stopwatch.Frequency);
 
         return units.AsSpan(0, count);
     }
