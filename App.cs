@@ -88,6 +88,11 @@ public sealed class App : IDisposable {
             do {
                 SDL.EventType type = (SDL.EventType)e.Type;
 
+                if(type == SDL.EventType.WindowPixelSizeChanged) {
+                    foreach(AppWindow window in windows)
+                        window.Resize();
+                }
+
                 if(type == SDL.EventType.WindowCloseRequested)
                     return;
             } while(SDL.PollEvent(out e));

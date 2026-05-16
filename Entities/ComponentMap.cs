@@ -1,13 +1,25 @@
+using System;
+using System.Numerics;
+
 namespace PanelWork.Entities;
 
-public sealed class ComponentMap {
-    object[] components = new object[100];
+public sealed class ComponentMap<T> where T : class {
+    T[] components = [];
 
-    public void Set(int index, object component) {
+    public void Set(int index, T component) {
+        if(components.Length <= index) {
+            int size = (int)BitOperations.RoundUpToPowerOf2((uint)index + 1);
+
+            Array.Resize(ref components, size);
+        }
+
         components[index] = component;
     }
 
-    public object Get(int index) {
+    public T Get(int index) {
+        if(components.Length <= index)
+            return null;
+
         return components[index];
     }
 }

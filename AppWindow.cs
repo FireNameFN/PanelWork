@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using PanelWork.Entities;
 using PanelWork.Layouting;
 using SDL3;
@@ -45,6 +46,8 @@ public sealed class AppWindow {
     readonly Graphics graphics;
 
     readonly LayoutManager layoutManager;
+
+    readonly ComponentLookup<FacadeComponent> facadeLookup;
 
     public Entity Content { get; set; }
 
@@ -97,9 +100,13 @@ public sealed class AppWindow {
         };
 
         layoutManager = new(app);
+
+        facadeLookup = app.entityManager.GetLookup<FacadeComponent>();
     }
 
-    void Resize() {
+    public void Resize() {
+        //app.device.Handle.vkDeviceWaitIdle();
+
         if(framebuffers is not null) {
             colorImageView.Dispose();
 
@@ -138,13 +145,17 @@ public sealed class AppWindow {
         VkResult result = presenter.Acquire(ulong.MaxValue, out uint index);
 
         if(result == VkResult.ErrorOutOfDateKHR) {
-            app.device.Handle.vkDeviceWaitIdle();
-
-            Resize();
+            //Resize();
 
             return;
         }
 
+        ReadOnlySpan<LayoutUnit> units = layoutManager.Update(Content);
+
+        UpdateDraw(units, index);
+    }
+
+    void UpdateDraw(ReadOnlySpan<LayoutUnit> units, uint index) {
         app.device.Handle.vkBeginCommandBuffer(commandBuffer.Handle, VkCommandBufferUsageFlags.OneTimeSubmit);
 
         commandBuffer.BeginRenderPass(app.renderPass.Handle, framebuffers[index].Handle, new(0, 0, (uint)presenter.Width, (uint)presenter.Height), new(0, 1, 0, 1), VkSubpassContents.Inline);
@@ -155,15 +166,9 @@ public sealed class AppWindow {
 
         //
 
-        //app.entityManager.GetComponent<FacadeComponent>(Content).Facade.Draw(graphics);
-
-        ReadOnlySpan<LayoutUnit> units = layoutManager.Update(Content);
-
-        foreach(LayoutUnit unit in units) {
-            FacadeComponent facade = app.entityManager.GetComponent<FacadeComponent>(unit.Entity);
-
-            facade?.Facade.Draw(graphics, unit);
-        }
+        foreach(LayoutUnit unit in units)
+            if(facadeLookup.TryGet(unit.Entity, out FacadeComponent facade))
+                facade.Facade.Draw(graphics, unit);
 
         //
 
@@ -177,7 +182,13 @@ public sealed class AppWindow {
 
         presenter.Present(index);
 
+        long t1 = Stopwatch.GetTimestamp();
+
         fence.Wait();
+
+        long t2 = Stopwatch.GetTimestamp();
+
+        //Console.WriteLine((t2 - t1) * 1000000d / Stopwatch.Frequency);
 
         fence.Reset();
 

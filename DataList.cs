@@ -70,6 +70,11 @@ public sealed class DataList<T> {
         Array.Resize(ref reverse, size);
         Array.Resize(ref array, size);
 
+        for(int i = index; i < size; i++) {
+            data[i] = i;
+            reverse[i] = i;
+        }
+
         return index;
     }
 }

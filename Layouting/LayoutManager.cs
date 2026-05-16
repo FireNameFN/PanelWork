@@ -1,15 +1,18 @@
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using PanelWork.Entities;
 
 namespace PanelWork.Layouting;
 
 public sealed class LayoutManager(App app) {
-    readonly App app = app;
+    readonly ComponentLookup<LayoutComponent> layoutLookup = app.entityManager.GetLookup<LayoutComponent>();
 
     LayoutUnit[] units = [];
 
     public ReadOnlySpan<LayoutUnit> Update(Entity entity) {
+        long t1 = Stopwatch.GetTimestamp();
+
         int count = 0;
 
         Index(entity, ref count);
@@ -26,13 +29,17 @@ public sealed class LayoutManager(App app) {
 
         UpdatePos(entity, ref index);
 
+        long t2 = Stopwatch.GetTimestamp();
+
+        //Console.WriteLine((t2 - t1) * 1000000d / Stopwatch.Frequency);
+
         return units.AsSpan(0, count);
     }
 
     void Index(Entity entity, ref int index) {
         int entityIndex = index++;
 
-        LayoutComponent layout = app.entityManager.GetComponent<LayoutComponent>(entity);
+        LayoutComponent layout = layoutLookup.Get(entity);
 
         foreach(Entity child in layout.Children)
             Index(child, ref index);
@@ -49,7 +56,7 @@ public sealed class LayoutManager(App app) {
     void UpdateMinSize(LayoutDirection dir, Entity entity, ref int index) {
         int entityIndex = index++;
 
-        LayoutComponent layout = app.entityManager.GetComponent<LayoutComponent>(entity);
+        LayoutComponent layout = layoutLookup.Get(entity);
 
         int size = 0;
 
@@ -72,7 +79,7 @@ public sealed class LayoutManager(App app) {
     }
 
     void UpdatePos(Entity entity, ref int index) {
-        LayoutComponent layout = app.entityManager.GetComponent<LayoutComponent>(entity);
+        LayoutComponent layout = layoutLookup.Get(entity);
 
         int x = layout.Padding.Left;
         int y = layout.Padding.Top;
