@@ -1,3 +1,3 @@
-namespace PanelWork;
+namespace PanelWork.Entities;
 
 public interface IComponent;

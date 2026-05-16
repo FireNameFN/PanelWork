@@ -44,7 +44,7 @@ public sealed class AppWindow {
 
     readonly Graphics graphics;
 
-    readonly LayoutManager layoutManager;
+    readonly LayoutEngine layoutEngine;
 
     readonly ComponentLookup<FacadeComponent> facadeLookup;
 
@@ -98,7 +98,7 @@ public sealed class AppWindow {
             pipeline = pipeline
         };
 
-        layoutManager = new(app);
+        layoutEngine = new(app);
 
         facadeLookup = app.entityManager.GetLookup<FacadeComponent>();
     }
@@ -149,7 +149,7 @@ public sealed class AppWindow {
             return;
         }
 
-        ReadOnlySpan<LayoutUnit> units = layoutManager.Update(Content);
+        ReadOnlySpan<LayoutUnit> units = layoutEngine.Update(Content);
 
         UpdateDraw(units, index);
     }

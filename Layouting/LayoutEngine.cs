@@ -5,7 +5,7 @@ using PanelWork.Entities;
 
 namespace PanelWork.Layouting;
 
-public sealed class LayoutManager(App app) {
+public sealed class LayoutEngine(App app) {
     readonly ComponentLookup<LayoutComponent> layoutLookup = app.entityManager.GetLookup<LayoutComponent>();
 
     LayoutUnit[] units = [];
