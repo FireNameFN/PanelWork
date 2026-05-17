@@ -13,9 +13,9 @@ public sealed class LayoutComponent : IComponent {
 
     public int MinHeight { get; set; }
 
-    public int Width { get; set; }
+    public Length Width { get; set; }
 
-    public int Height { get; set; }
+    public Length Height { get; set; }
 
     public Side Padding { get; set; }
 

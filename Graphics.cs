@@ -13,13 +13,31 @@ public sealed class Graphics {
 
     internal Pipeline pipeline;
 
-    public void DrawRect(int x, int y, int width, int height, Vector4 color) {
-        drawContext.BindPipeline(pipeline);
+    Pipeline currentPipeline;
 
-        drawHandle.WithInstance([Matrix.CreateFrom(Matrix.CreateViewport(1280, 720))]);
-
-        drawHandle.AddDraw(Rect.Create(x, y, x + width, y + height, color));
+    public void UsePipeline(Pipeline pipeline) {
+        if(currentPipeline == pipeline)
+            return;
 
         drawHandle.Flush();
+
+        drawContext.BindPipeline(pipeline);
+
+        currentPipeline = pipeline;
+    }
+
+    public void Clear() {
+        if(currentPipeline is null)
+            return;
+
+        drawHandle.Flush();
+
+        currentPipeline = null;
+    }
+
+    public void DrawRect(int x, int y, int width, int height, Vector4 color) {
+        UsePipeline(pipeline);
+
+        drawHandle.AddDraw(Rect.Create(x, y, x + width, y + height, color));
     }
 }

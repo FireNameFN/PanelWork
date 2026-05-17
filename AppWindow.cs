@@ -165,9 +165,15 @@ public sealed class AppWindow {
 
         //
 
+        drawHandle.WithInstance([Matrix.CreateFrom(Matrix.CreateViewport(presenter.Width, presenter.Height))]);
+
         foreach(LayoutUnit unit in units)
             if(facadeLookup.TryGet(unit.Entity, out FacadeComponent facade))
                 facade.Facade.Draw(graphics, unit);
+
+        //drawHandle.Flush();
+
+        graphics.Clear();
 
         //
 

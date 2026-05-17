@@ -43,11 +43,18 @@ public readonly struct LayoutDirection {
         return ref unit.Height;
     }
 
+    public ref int Available(ref LayoutUnit unit) {
+        if(IsHorizontal)
+            return ref unit.AvailableWidth;
+
+        return ref unit.AvailableHeight;
+    }
+
     public int Min(LayoutComponent layout) {
         return IsHorizontal ? layout.MinWidth : layout.MinHeight;
     }
 
-    public int Size(LayoutComponent layout) {
+    public Length Size(LayoutComponent layout) {
         return IsHorizontal ? layout.Width : layout.Height;
     }
 

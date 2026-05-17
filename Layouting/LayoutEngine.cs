@@ -10,6 +10,10 @@ public sealed class LayoutEngine(App app) {
 
     LayoutUnit[] units = [];
 
+    long time = 0;
+
+    int frames = 0;
+
     public ReadOnlySpan<LayoutUnit> Update(Entity entity) {
         long t1 = Stopwatch.GetTimestamp();
 
@@ -19,19 +23,37 @@ public sealed class LayoutEngine(App app) {
 
         int index = 0;
 
-        UpdateMinSize(LayoutDirection.Horizontal, entity, ref index);
+        UpdateMinSize(LayoutDirection.Horizontal, ref index);
 
         index = 0;
 
-        UpdateMinSize(LayoutDirection.Vertical, entity, ref index);
+        UpdateMinSize(LayoutDirection.Vertical, ref index);
 
         index = 0;
 
-        UpdatePos(entity, ref index);
+        UpdateSize(LayoutDirection.Horizontal, ref index);
+
+        index = 0;
+
+        UpdateSize(LayoutDirection.Vertical, ref index);
+
+        index = 0;
+
+        units[0].X = 0;
+        units[0].Y = 0;
+
+        UpdatePos(ref index);
 
         long t2 = Stopwatch.GetTimestamp();
 
-        Console.WriteLine((t2 - t1) * 1000000d / Stopwatch.Frequency);
+        time += t2 - t1;
+
+        if(++frames >= 100) {
+            Console.WriteLine(time * 10000d / Stopwatch.Frequency);
+
+            frames = 0;
+            time = 0;
+        }
 
         return units.AsSpan(0, count);
     }
@@ -51,21 +73,20 @@ public sealed class LayoutEngine(App app) {
         }
 
         units[entityIndex].Entity = entity;
+        units[entityIndex].Layout = layout;
     }
 
-    void UpdateMinSize(LayoutDirection dir, Entity entity, ref int index) {
+    void UpdateMinSize(LayoutDirection dir, ref int index) {
         int entityIndex = index++;
 
-        LayoutComponent layout = layoutLookup.Get(entity);
+        LayoutComponent layout = units[entityIndex].Layout;
 
         int size = 0;
 
         for(int i = 0; i < layout.Children.Count; i++) {
-            Entity child = layout.Children[i];
-
             int childIndex = index;
 
-            UpdateMinSize(dir, child, ref index);
+            UpdateMinSize(dir, ref index);
 
             dir.SumOrMax(units[childIndex], layout.Layout, ref size);
         }
@@ -75,18 +96,44 @@ public sealed class LayoutEngine(App app) {
 
         size += dir.Size(layout.Padding);
 
-        dir.Size(ref units[entityIndex]) = Math.Max(dir.Min(layout), size);
+        int totalSize = Math.Max(dir.Min(layout), size);
+
+        dir.Size(ref units[entityIndex]) = totalSize;
+
+        dir.Available(ref units[entityIndex]) = totalSize - size;
     }
 
-    void UpdatePos(Entity entity, ref int index) {
-        LayoutComponent layout = layoutLookup.Get(entity);
+    void UpdateSize(LayoutDirection dir, ref int index) {
+        int entityIndex = index++;
 
-        int x = layout.Padding.Left;
-        int y = layout.Padding.Top;
+        LayoutComponent layout = units[entityIndex].Layout;
+
+        int available = dir.Available(ref units[entityIndex]);
 
         for(int i = 0; i < layout.Children.Count; i++) {
-            Entity child = layout.Children[i];
+            ref LayoutUnit childUnit = ref units[index + i];
 
+            LayoutComponent childLayout = childUnit.Layout;
+
+            if(dir.Size(childLayout).Unit != Primitives.LengthUnit.Star)
+                continue;
+
+            dir.Size(ref childUnit) += available;
+
+            available = 0;
+        }
+
+        for(int i = 0; i < layout.Children.Count; i++)
+            UpdateSize(dir, ref index);
+    }
+
+    void UpdatePos(ref int index) {
+        LayoutComponent layout = units[index].Layout;
+
+        int x = units[index].X + layout.Padding.Left;
+        int y = units[index].Y + layout.Padding.Top;
+
+        for(int i = 0; i < layout.Children.Count; i++) {
             index++;
 
             units[index].X = x;
@@ -97,7 +144,7 @@ public sealed class LayoutEngine(App app) {
             else
                 y += units[index].Height + layout.Gap;
 
-            UpdatePos(child, ref index);
+            UpdatePos(ref index);
         }
     }
 }
