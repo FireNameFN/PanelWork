@@ -33,7 +33,7 @@ public sealed class LayoutEngine(App app) {
 
         time += t2 - t1;
 
-        if(++frames >= 100) {
+        if(++frames >= 10000) {
             Console.WriteLine(time * 10000d / Stopwatch.Frequency);
 
             frames = 0;
@@ -44,8 +44,8 @@ public sealed class LayoutEngine(App app) {
     void UpdateMinSize(LayoutComponent layout, LayoutDirection dir) {
         int size = 0;
 
-        for(int i = 0; i < layout.Children.Count; i++) {
-            LayoutComponent childLayout = layoutLookup.Get(layout.Children[i]);
+        foreach(Entity child in layout.Children) {
+            LayoutComponent childLayout = layoutLookup.Get(child);
 
             UpdateMinSize(childLayout, dir);
 
@@ -69,8 +69,8 @@ public sealed class LayoutEngine(App app) {
 
         int available = dir.LayoutAvailable(layout);
 
-        for(int i = 0; i < layout.Children.Count; i++) {
-            LayoutComponent childLayout = layoutLookup.Get(layout.Children[i]);
+        foreach(Entity child in layout.Children) {
+            LayoutComponent childLayout = layoutLookup.Get(child);
 
             if(dir.Size(childLayout).Unit != Primitives.LengthUnit.Star)
                 continue;
@@ -80,16 +80,16 @@ public sealed class LayoutEngine(App app) {
             available = 0;
         }
 
-        for(int i = 0; i < layout.Children.Count; i++)
-            UpdateSize(layout.Children[i], dir);
+        foreach(Entity child in layout.Children)
+            UpdateSize(child, dir);
     }
 
     void UpdatePos(LayoutComponent layout) {
         int x = layout.LayoutX + layout.Padding.Left;
         int y = layout.LayoutY + layout.Padding.Top;
 
-        for(int i = 0; i < layout.Children.Count; i++) {
-            LayoutComponent childLayout = layoutLookup.Get(layout.Children[i]);
+        foreach(Entity child in layout.Children) {
+            LayoutComponent childLayout = layoutLookup.Get(child);
 
             childLayout.LayoutX = x;
             childLayout.LayoutY = y;

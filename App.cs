@@ -83,7 +83,7 @@ public sealed class App : IDisposable {
 
     public void Run() {
         while(true) {
-            SDL.WaitEvent(out SDL.Event e);
+            SDL.PollEvent(out SDL.Event e);
 
             do {
                 SDL.EventType type = (SDL.EventType)e.Type;
