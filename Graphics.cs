@@ -27,11 +27,6 @@ public sealed class Graphics {
     }
 
     public void Clear() {
-        if(currentPipeline is null)
-            return;
-
-        drawHandle.Flush();
-
         currentPipeline = null;
     }
 

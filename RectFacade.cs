@@ -1,3 +1,4 @@
+using PanelWork.Layouting;
 using PanelWork.Primitives;
 
 namespace PanelWork;
@@ -5,7 +6,7 @@ namespace PanelWork;
 public sealed class RectFacade : IFacade {
     public Color Color { get; set; }
 
-    public void Draw(Graphics graphics, LayoutComponent layout) {
-        graphics.DrawRect(layout.LayoutX, layout.LayoutY, layout.LayoutWidth, layout.LayoutHeight, Color);
+    public void Draw(Graphics graphics, LayoutBox box) {
+        graphics.DrawRect(box.X, box.Y, box.Width, box.Height, Color);
     }
 }

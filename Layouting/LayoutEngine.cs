@@ -24,8 +24,8 @@ public sealed class LayoutEngine(App app) {
 
         UpdateSize(entity, LayoutDirection.Vertical);
 
-        layout.LayoutX = 0;
-        layout.LayoutY = 0;
+        layout.LayoutBox.X = 0;
+        layout.LayoutBox.Y = 0;
 
         UpdatePos(layout);
 
@@ -85,19 +85,19 @@ public sealed class LayoutEngine(App app) {
     }
 
     void UpdatePos(LayoutComponent layout) {
-        int x = layout.LayoutX + layout.Padding.Left;
-        int y = layout.LayoutY + layout.Padding.Top;
+        int x = layout.LayoutBox.X + layout.Padding.Left;
+        int y = layout.LayoutBox.Y + layout.Padding.Top;
 
         foreach(Entity child in layout.Children) {
             LayoutComponent childLayout = layoutLookup.Get(child);
 
-            childLayout.LayoutX = x;
-            childLayout.LayoutY = y;
+            childLayout.LayoutBox.X = x;
+            childLayout.LayoutBox.Y = y;
 
             if(layout.Layout != LayoutType.Vertical)
-                x += childLayout.LayoutWidth + layout.Gap;
+                x += childLayout.LayoutBox.Width + layout.Gap;
             else
-                y += childLayout.LayoutHeight + layout.Gap;
+                y += childLayout.LayoutBox.Height + layout.Gap;
 
             UpdatePos(childLayout);
         }

@@ -29,25 +29,18 @@ public readonly struct LayoutDirection {
             value = Math.Max(value, val);
     }
 
-    public ref int LayoutPos(LayoutComponent unit) {
-        if(IsHorizontal)
-            return ref unit.LayoutX;
-
-        return ref unit.LayoutY;
-    }
-
     public ref int LayoutSize(LayoutComponent unit) {
         if(IsHorizontal)
-            return ref unit.LayoutWidth;
+            return ref unit.LayoutBox.Width;
 
-        return ref unit.LayoutHeight;
+        return ref unit.LayoutBox.Height;
     }
 
     public ref int LayoutAvailable(LayoutComponent unit) {
         if(IsHorizontal)
-            return ref unit.LayoutAvailableWidth;
+            return ref unit.LayoutBox.AvailableWidth;
 
-        return ref unit.LayoutAvailableHeight;
+        return ref unit.LayoutBox.AvailableHeight;
     }
 
     public int Min(LayoutComponent layout) {

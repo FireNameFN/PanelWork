@@ -1,4 +1,3 @@
-using System;
 using PanelWork.Entities;
 using PanelWork.Layouting;
 using SDL3;
@@ -171,13 +170,9 @@ public sealed class AppWindow {
 
         drawHandle.WithInstance([Matrix.CreateFrom(Matrix.CreateViewport(presenter.Width, presenter.Height))]);
 
-        //foreach(LayoutUnit unit in units)
-        //    if(facadeLookup.TryGet(unit.Entity, out FacadeComponent facade))
-        //        facade.Facade.Draw(graphics, unit);
-
         UpdateDrawEntity(Content);
 
-        //drawHandle.Flush();
+        drawHandle.Flush();
 
         graphics.Clear();
 
@@ -208,8 +203,8 @@ public sealed class AppWindow {
         LayoutComponent layout = layoutLookup.Get(entity);
 
         if(facadeLookup.TryGet(entity, out FacadeComponent facade))
-            facade.Facade.Draw(graphics, layout);
-        
+            facade.Facade.Draw(graphics, layout.LayoutBox);
+
         foreach(Entity child in layout.Children)
             UpdateDrawEntity(child);
     }

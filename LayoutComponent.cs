@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using PanelWork.Entities;
+using PanelWork.Layouting;
 using PanelWork.Primitives;
 
 namespace PanelWork;
@@ -21,15 +22,5 @@ public sealed class LayoutComponent : IComponent {
 
     public int Gap { get; set; }
 
-    public int LayoutX;
-
-    public int LayoutY;
-
-    public int LayoutWidth;
-
-    public int LayoutHeight;
-
-    public int LayoutAvailableWidth;
-
-    public int LayoutAvailableHeight;
+    public LayoutBox LayoutBox;
 }
