@@ -20,4 +20,16 @@ public sealed class LayoutComponent : IComponent {
     public Side Padding { get; set; }
 
     public int Gap { get; set; }
+
+    public int LayoutX;
+
+    public int LayoutY;
+
+    public int LayoutWidth;
+
+    public int LayoutHeight;
+
+    public int LayoutAvailableWidth;
+
+    public int LayoutAvailableHeight;
 }

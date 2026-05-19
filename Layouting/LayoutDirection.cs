@@ -20,8 +20,8 @@ public readonly struct LayoutDirection {
         return IsHorizontal == (type != LayoutType.Vertical);
     }
 
-    public void SumOrMax(LayoutUnit unit, LayoutType type, ref int value) {
-        int val = Size(ref unit);
+    public void LayoutSumOrMax(LayoutComponent unit, LayoutType type, ref int value) {
+        int val = LayoutSize(unit);
 
         if(Is(type))
             value += val;
@@ -29,25 +29,25 @@ public readonly struct LayoutDirection {
             value = Math.Max(value, val);
     }
 
-    public ref int Pos(ref LayoutUnit unit) {
+    public ref int LayoutPos(LayoutComponent unit) {
         if(IsHorizontal)
-            return ref unit.X;
+            return ref unit.LayoutX;
 
-        return ref unit.Y;
+        return ref unit.LayoutY;
     }
 
-    public ref int Size(ref LayoutUnit unit) {
+    public ref int LayoutSize(LayoutComponent unit) {
         if(IsHorizontal)
-            return ref unit.Width;
+            return ref unit.LayoutWidth;
 
-        return ref unit.Height;
+        return ref unit.LayoutHeight;
     }
 
-    public ref int Available(ref LayoutUnit unit) {
+    public ref int LayoutAvailable(LayoutComponent unit) {
         if(IsHorizontal)
-            return ref unit.AvailableWidth;
+            return ref unit.LayoutAvailableWidth;
 
-        return ref unit.AvailableHeight;
+        return ref unit.LayoutAvailableHeight;
     }
 
     public int Min(LayoutComponent layout) {

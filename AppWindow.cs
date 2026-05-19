@@ -46,6 +46,8 @@ public sealed class AppWindow {
 
     readonly LayoutEngine layoutEngine;
 
+    readonly ComponentLookup<LayoutComponent> layoutLookup;
+
     readonly ComponentLookup<FacadeComponent> facadeLookup;
 
     public Entity Content { get; set; }
@@ -100,6 +102,8 @@ public sealed class AppWindow {
 
         layoutEngine = new(app);
 
+        layoutLookup = app.entityManager.GetLookup<LayoutComponent>();
+
         facadeLookup = app.entityManager.GetLookup<FacadeComponent>();
     }
 
@@ -149,12 +153,12 @@ public sealed class AppWindow {
             return;
         }
 
-        ReadOnlySpan<LayoutUnit> units = layoutEngine.Update(Content);
+        layoutEngine.Update(Content);
 
-        UpdateDraw(units, index);
+        UpdateDraw(index);
     }
 
-    void UpdateDraw(ReadOnlySpan<LayoutUnit> units, uint index) {
+    void UpdateDraw(uint index) {
         app.device.Handle.vkBeginCommandBuffer(commandBuffer.Handle, VkCommandBufferUsageFlags.OneTimeSubmit);
 
         commandBuffer.BeginRenderPass(app.renderPass.Handle, framebuffers[index].Handle, new(0, 0, (uint)presenter.Width, (uint)presenter.Height), new(0, 1, 0, 1), VkSubpassContents.Inline);
@@ -167,9 +171,11 @@ public sealed class AppWindow {
 
         drawHandle.WithInstance([Matrix.CreateFrom(Matrix.CreateViewport(presenter.Width, presenter.Height))]);
 
-        foreach(LayoutUnit unit in units)
-            if(facadeLookup.TryGet(unit.Entity, out FacadeComponent facade))
-                facade.Facade.Draw(graphics, unit);
+        //foreach(LayoutUnit unit in units)
+        //    if(facadeLookup.TryGet(unit.Entity, out FacadeComponent facade))
+        //        facade.Facade.Draw(graphics, unit);
+
+        UpdateDrawEntity(Content);
 
         //drawHandle.Flush();
 
@@ -196,5 +202,15 @@ public sealed class AppWindow {
         descriptorStorage.Clear();
 
         drawHandle.BufferClear();
+    }
+
+    void UpdateDrawEntity(Entity entity) {
+        LayoutComponent layout = layoutLookup.Get(entity);
+
+        if(facadeLookup.TryGet(entity, out FacadeComponent facade))
+            facade.Facade.Draw(graphics, layout);
+        
+        foreach(Entity child in layout.Children)
+            UpdateDrawEntity(child);
     }
 }
