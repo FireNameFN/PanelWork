@@ -45,7 +45,7 @@ public sealed class App : IDisposable {
 
         instance.TryCreateDevicePreferDiscrete(IsPresentationSupported, ["VK_KHR_swapchain"], features, out physicalDevice, out device, out queue);
 
-        command = new(device, queue);
+        command = new(queue);
 
         VkAttachmentDescription colorAttachment = new() {
             format = VkFormat.B8G8R8A8Srgb,

@@ -57,7 +57,7 @@ public sealed class AppWindow {
 
         SDL.VulkanCreateSurface(handle, app.physicalDevice.Instance.Instance, 0, out nint surface);
 
-        presenter = new(app.device, app.physicalDevice, app.queue, (ulong)surface) {
+        presenter = new(app.physicalDevice, app.queue, (ulong)surface) {
             Usage = VkImageUsageFlags.ColorAttachment,
             PresentMode = VkPresentModeKHR.Mailbox
         };
@@ -68,9 +68,9 @@ public sealed class AppWindow {
 
         commandBuffer = commandPool.AllocateCommandBuffer(VkCommandBufferLevel.Primary);
 
-        vertexBuffer = new(app.device, app.physicalDevice);
+        vertexBuffer = new(app.physicalDevice, app.device);
 
-        instanceBuffer = new(app.device, app.physicalDevice);
+        instanceBuffer = new(app.physicalDevice, app.device);
 
         drawContext = new(app.device, descriptorStorage.CreateContext(), commandBuffer.Handle);
 
