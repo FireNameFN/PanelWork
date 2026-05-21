@@ -20,50 +20,32 @@ public readonly struct LayoutDirection {
         return IsHorizontal == (type != LayoutType.Vertical);
     }
 
-    public void LayoutSumOrMaxMin(LayoutComponent unit, LayoutType type, ref int value) {
-        int val = LayoutMinSize(unit);
-
+    public void SumOrMax(LayoutType type, int value, ref int result) {
         if(Is(type))
-            value += val;
+            result += value;
         else
-            value = Math.Max(value, val);
+            result = Math.Max(result, value);
     }
 
-    public void LayoutSumOrMaxMax(LayoutComponent unit, LayoutType type, ref int value) {
-        int val = LayoutMaxSize(unit);
-
-        if(Is(type))
-            value += val;
-        else
-            value = Math.Max(value, val);
-    }
-
-    public ref int LayoutSize(LayoutComponent unit) {
+    public ref int Min(ref LayoutUnit unit) {
         if(IsHorizontal)
-            return ref unit.LayoutBox.Width;
+            return ref unit.MinWidth;
 
-        return ref unit.LayoutBox.Height;
+        return ref unit.MinHeight;
     }
 
-    public ref int LayoutMinSize(LayoutComponent unit) {
+    public ref int Max(ref LayoutUnit unit) {
         if(IsHorizontal)
-            return ref unit.LayoutBox.MinWidth;
+            return ref unit.MaxWidth;
 
-        return ref unit.LayoutBox.MinHeight;
+        return ref unit.MaxHeight;
     }
 
-    public ref int LayoutMaxSize(LayoutComponent unit) {
+    public ref int Available(ref LayoutUnit unit) {
         if(IsHorizontal)
-            return ref unit.LayoutBox.MaxWidth;
+            return ref unit.AvailableWidth;
 
-        return ref unit.LayoutBox.MaxHeight;
-    }
-
-    public ref int LayoutAvailable(LayoutComponent unit) {
-        if(IsHorizontal)
-            return ref unit.LayoutBox.AvailableWidth;
-
-        return ref unit.LayoutBox.AvailableHeight;
+        return ref unit.AvailableHeight;
     }
 
     public int Min(LayoutComponent layout) {
@@ -76,6 +58,13 @@ public readonly struct LayoutDirection {
 
     public Length Size(LayoutComponent layout) {
         return IsHorizontal ? layout.Width : layout.Height;
+    }
+
+    public ref int LayoutSize(LayoutComponent unit) {
+        if(IsHorizontal)
+            return ref unit.LayoutBox.Width;
+
+        return ref unit.LayoutBox.Height;
     }
 
     public int Size(Side side) {

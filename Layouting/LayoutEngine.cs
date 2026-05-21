@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Numerics;
 using PanelWork.Entities;
 using PanelWork.Primitives;
 
@@ -7,6 +8,8 @@ namespace PanelWork.Layouting;
 
 public sealed class LayoutEngine(App app) {
     readonly ComponentLookup<LayoutComponent> layoutLookup = app.entityManager.GetLookup<LayoutComponent>();
+
+    LayoutUnit[] units = [];
 
     long time = 0;
 
@@ -17,22 +20,40 @@ public sealed class LayoutEngine(App app) {
 
         LayoutComponent layout = layoutLookup.Get(entity);
 
-        UpdateMinSize(layout, LayoutDirection.Horizontal);
+        int index = 0;
 
-        UpdateMaxSize(layout, LayoutDirection.Horizontal);
+        Index(entity, ref index);
 
-        UpdateMinSize(layout, LayoutDirection.Vertical);
+        index = 0;
 
-        UpdateMaxSize(layout, LayoutDirection.Vertical);
+        UpdateMinSize(LayoutDirection.Horizontal, ref index);
 
-        UpdateSize(entity, LayoutDirection.Horizontal);
+        index = 0;
 
-        UpdateSize(entity, LayoutDirection.Vertical);
+        UpdateMaxSize(LayoutDirection.Horizontal, ref index);
+
+        index = 0;
+
+        UpdateMinSize(LayoutDirection.Vertical, ref index);
+
+        index = 0;
+
+        UpdateMaxSize(LayoutDirection.Vertical, ref index);
+
+        index = 0;
+
+        UpdateSize(LayoutDirection.Horizontal, ref index);
+
+        index = 0;
+
+        UpdateSize(LayoutDirection.Vertical, ref index);
 
         layout.LayoutBox.X = 0;
         layout.LayoutBox.Y = 0;
 
-        UpdatePos(layout);
+        index = 0;
+
+        UpdatePos(ref index);
 
         long t2 = Stopwatch.GetTimestamp();
 
@@ -46,15 +67,38 @@ public sealed class LayoutEngine(App app) {
         }
     }
 
-    void UpdateMinSize(LayoutComponent layout, LayoutDirection dir) {
+    void Index(Entity entity, ref int index) {
+        int entityIndex = index++;
+
+        LayoutComponent layout = layoutLookup.Get(entity);
+
+        foreach(Entity child in layout.Children)
+            Index(child, ref index);
+
+        if(units.Length <= index) {
+            int size = (int)BitOperations.RoundUpToPowerOf2((uint)index);
+
+            Array.Resize(ref units, size);
+        }
+
+        units[entityIndex].Layout = layout;
+    }
+
+    void UpdateMinSize(LayoutDirection dir, ref int index) {
+        int entityIndex = index++;
+
+        LayoutComponent layout = units[entityIndex].Layout;
+
         int size = 0;
 
-        foreach(Entity child in layout.Children) {
-            LayoutComponent childLayout = layoutLookup.Get(child);
+        for(int i = 0; i < layout.Children.Count; i++) {
+            int childIndex = index;
 
-            UpdateMinSize(childLayout, dir);
+            UpdateMinSize(dir, ref index);
 
-            dir.LayoutSumOrMaxMin(childLayout, layout.Layout, ref size);
+            int min = dir.Min(ref units[childIndex]);
+
+            dir.SumOrMax(layout.Layout, min, ref size);
         }
 
         if(dir.Is(layout.Layout))
@@ -64,21 +108,27 @@ public sealed class LayoutEngine(App app) {
 
         int totalSize = Math.Max(dir.Min(layout), size);
 
-        dir.LayoutMinSize(layout) = totalSize;
+        dir.Min(ref units[entityIndex]) = totalSize;
         dir.LayoutSize(layout) = totalSize;
 
-        dir.LayoutAvailable(layout) = totalSize - size;
+        dir.Available(ref units[entityIndex]) = totalSize - size;
     }
 
-    void UpdateMaxSize(LayoutComponent layout, LayoutDirection dir) {
+    void UpdateMaxSize(LayoutDirection dir, ref int index) {
+        int entityIndex = index++;
+
+        LayoutComponent layout = units[entityIndex].Layout;
+
         int size = 0;
 
-        foreach(Entity child in layout.Children) {
-            LayoutComponent childLayout = layoutLookup.Get(child);
+        for(int i = 0; i < layout.Children.Count; i++) {
+            int childIndex = index;
 
-            UpdateMaxSize(childLayout, dir);
+            UpdateMaxSize(dir, ref index);
 
-            dir.LayoutSumOrMaxMax(childLayout, layout.Layout, ref size);
+            int max = dir.Max(ref units[childIndex]);
+
+            dir.SumOrMax(layout.Layout, max, ref size);
         }
 
         if(dir.Is(layout.Layout))
@@ -86,30 +136,34 @@ public sealed class LayoutEngine(App app) {
 
         size += dir.Size(layout.Padding);
 
-        int totalSize = Math.Max(dir.LayoutMinSize(layout), Math.Max(dir.Max(layout), size));
+        int totalSize = Math.Max(dir.Min(ref units[entityIndex]), Math.Max(dir.Max(layout), size));
 
-        dir.LayoutMaxSize(layout) = totalSize;
+        dir.Max(ref units[entityIndex]) = totalSize;
     }
 
-    void UpdateSize(Entity entity, LayoutDirection dir) {
-        LayoutComponent layout = layoutLookup.Get(entity);
+    void UpdateSize(LayoutDirection dir, ref int index) {
+        int entityIndex = index++;
 
-        int available = dir.LayoutAvailable(layout);
+        LayoutComponent layout = units[entityIndex].Layout;
+
+        int available = dir.Available(ref units[entityIndex]);
 
         if(available <= 0)
             return;
 
         double stars = 0;
 
-        foreach(Entity child in layout.Children) {
-            LayoutComponent childLayout = layoutLookup.Get(child);
+        for(int i = 0; i < layout.Children.Count; i++) {
+            int childIndex = index + i;
+
+            LayoutComponent childLayout = units[childIndex].Layout;
 
             Length length = dir.Size(childLayout);
 
             if(length.Unit != LengthUnit.Star)
                 continue;
 
-            available += dir.LayoutMinSize(childLayout);
+            available += dir.Min(ref units[childIndex]);
 
             stars += length.Value;
         }
@@ -133,8 +187,10 @@ public sealed class LayoutEngine(App app) {
 
             stars = 0;
 
-            foreach(Entity child in layout.Children) {
-                LayoutComponent childLayout = layoutLookup.Get(child);
+            for(int i = 0; i < layout.Children.Count; i++) {
+                int childIndex = index + i;
+
+                LayoutComponent childLayout = units[childIndex].Layout;
 
                 Length length = dir.Size(childLayout);
 
@@ -143,18 +199,18 @@ public sealed class LayoutEngine(App app) {
 
                 double size = length.Value * pixelsPerStar;
 
-                if(size <= dir.LayoutMinSize(childLayout)) {
-                    passAvailable -= dir.LayoutMinSize(childLayout);
+                if(size <= dir.Min(ref units[childIndex])) {
+                    passAvailable -= dir.Min(ref units[childIndex]);
 
-                    dir.LayoutSize(childLayout) = dir.LayoutMinSize(childLayout);
+                    dir.LayoutSize(childLayout) = dir.Min(ref units[childIndex]);
 
                     continue;
                 }
 
-                if(size >= dir.LayoutMaxSize(childLayout)) {
-                    passAvailable -= dir.LayoutMaxSize(childLayout);
+                if(size >= dir.Max(ref units[childIndex])) {
+                    passAvailable -= dir.Max(ref units[childIndex]);
 
-                    dir.LayoutSize(childLayout) = dir.LayoutMaxSize(childLayout);
+                    dir.LayoutSize(childLayout) = dir.Max(ref units[childIndex]);
 
                     continue;
                 }
@@ -171,16 +227,20 @@ public sealed class LayoutEngine(App app) {
                 break;
         }
 
-        foreach(Entity child in layout.Children)
-            UpdateSize(child, dir);
+        for(int i = 0; i < layout.Children.Count; i++)
+            UpdateSize(dir, ref index);
     }
 
-    void UpdatePos(LayoutComponent layout) {
+    void UpdatePos(ref int index) {
+        int entityIndex = index++;
+
+        LayoutComponent layout = units[entityIndex].Layout;
+
         int x = layout.LayoutBox.X + layout.Padding.Left;
         int y = layout.LayoutBox.Y + layout.Padding.Top;
 
-        foreach(Entity child in layout.Children) {
-            LayoutComponent childLayout = layoutLookup.Get(child);
+        for(int i = 0; i < layout.Children.Count; i++) {
+            LayoutComponent childLayout = units[index].Layout;
 
             childLayout.LayoutBox.X = x;
             childLayout.LayoutBox.Y = y;
@@ -190,7 +250,7 @@ public sealed class LayoutEngine(App app) {
             else
                 y += childLayout.LayoutBox.Height + layout.Gap;
 
-            UpdatePos(childLayout);
+            UpdatePos(ref index);
         }
     }
 }
