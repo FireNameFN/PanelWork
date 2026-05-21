@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using PanelWork.Entities;
+using PanelWork.Primitives;
 
 namespace PanelWork.Layouting;
 
@@ -18,7 +19,11 @@ public sealed class LayoutEngine(App app) {
 
         UpdateMinSize(layout, LayoutDirection.Horizontal);
 
+        UpdateMaxSize(layout, LayoutDirection.Horizontal);
+
         UpdateMinSize(layout, LayoutDirection.Vertical);
+
+        UpdateMaxSize(layout, LayoutDirection.Vertical);
 
         UpdateSize(entity, LayoutDirection.Horizontal);
 
@@ -49,7 +54,7 @@ public sealed class LayoutEngine(App app) {
 
             UpdateMinSize(childLayout, dir);
 
-            dir.LayoutSumOrMax(childLayout, layout.Layout, ref size);
+            dir.LayoutSumOrMaxMin(childLayout, layout.Layout, ref size);
         }
 
         if(dir.Is(layout.Layout))
@@ -59,9 +64,31 @@ public sealed class LayoutEngine(App app) {
 
         int totalSize = Math.Max(dir.Min(layout), size);
 
+        dir.LayoutMinSize(layout) = totalSize;
         dir.LayoutSize(layout) = totalSize;
 
         dir.LayoutAvailable(layout) = totalSize - size;
+    }
+
+    void UpdateMaxSize(LayoutComponent layout, LayoutDirection dir) {
+        int size = 0;
+
+        foreach(Entity child in layout.Children) {
+            LayoutComponent childLayout = layoutLookup.Get(child);
+
+            UpdateMaxSize(childLayout, dir);
+
+            dir.LayoutSumOrMaxMax(childLayout, layout.Layout, ref size);
+        }
+
+        if(dir.Is(layout.Layout))
+            size += layout.Gap * (layout.Children.Count - 1);
+
+        size += dir.Size(layout.Padding);
+
+        int totalSize = Math.Max(dir.LayoutMinSize(layout), Math.Max(dir.Max(layout), size));
+
+        dir.LayoutMaxSize(layout) = totalSize;
     }
 
     void UpdateSize(Entity entity, LayoutDirection dir) {
@@ -69,15 +96,79 @@ public sealed class LayoutEngine(App app) {
 
         int available = dir.LayoutAvailable(layout);
 
+        if(available <= 0)
+            return;
+
+        double stars = 0;
+
         foreach(Entity child in layout.Children) {
             LayoutComponent childLayout = layoutLookup.Get(child);
 
-            if(dir.Size(childLayout).Unit != Primitives.LengthUnit.Star)
+            Length length = dir.Size(childLayout);
+
+            if(length.Unit != LengthUnit.Star)
                 continue;
 
-            dir.LayoutSize(childLayout) += available;
+            available += dir.LayoutMinSize(childLayout);
 
-            available = 0;
+            stars += length.Value;
+        }
+
+        if(stars <= 0)
+            return;
+
+        int passAvailable = available;
+
+        double pixelsPerStar = 0;
+
+        while(true) {
+            double nextPixelsPerStar = passAvailable / stars;
+
+            if(nextPixelsPerStar == pixelsPerStar)
+                break;
+
+            pixelsPerStar = nextPixelsPerStar;
+
+            passAvailable = available;
+
+            stars = 0;
+
+            foreach(Entity child in layout.Children) {
+                LayoutComponent childLayout = layoutLookup.Get(child);
+
+                Length length = dir.Size(childLayout);
+
+                if(length.Unit != LengthUnit.Star)
+                    continue;
+
+                double size = length.Value * pixelsPerStar;
+
+                if(size <= dir.LayoutMinSize(childLayout)) {
+                    passAvailable -= dir.LayoutMinSize(childLayout);
+
+                    dir.LayoutSize(childLayout) = dir.LayoutMinSize(childLayout);
+
+                    continue;
+                }
+
+                if(size >= dir.LayoutMaxSize(childLayout)) {
+                    passAvailable -= dir.LayoutMaxSize(childLayout);
+
+                    dir.LayoutSize(childLayout) = dir.LayoutMaxSize(childLayout);
+
+                    continue;
+                }
+
+                dir.LayoutSize(childLayout) = (int)size;
+
+                stars += length.Value;
+            }
+
+            if(passAvailable <= 0)
+                break;
+
+            if(stars <= 0)
+                break;
         }
 
         foreach(Entity child in layout.Children)

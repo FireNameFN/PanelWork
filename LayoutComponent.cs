@@ -14,6 +14,10 @@ public sealed class LayoutComponent : IComponent {
 
     public int MinHeight { get; set; }
 
+    public int MaxWidth { get; set; } = 10000;
+
+    public int MaxHeight { get; set; } = 10000;
+
     public Length Width { get; set; }
 
     public Length Height { get; set; }
