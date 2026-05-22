@@ -197,25 +197,23 @@ public sealed class LayoutEngine(App app) {
                 if(length.Unit != LengthUnit.Star)
                     continue;
 
-                double size = length.Value * pixelsPerStar;
+                int size = (int)(length.Value * pixelsPerStar);
 
-                if(size <= dir.Min(ref units[childIndex])) {
-                    passAvailable -= dir.Min(ref units[childIndex]);
+                int min = dir.Min(ref units[childIndex]);
 
-                    dir.LayoutSize(childLayout) = dir.Min(ref units[childIndex]);
+                int max = dir.Max(ref units[childIndex]);
 
-                    continue;
-                }
+                if(size <= min || size >= max) {
+                    int clampedSize = Math.Clamp(size, min, max);
 
-                if(size >= dir.Max(ref units[childIndex])) {
-                    passAvailable -= dir.Max(ref units[childIndex]);
+                    passAvailable -= clampedSize;
 
-                    dir.LayoutSize(childLayout) = dir.Max(ref units[childIndex]);
+                    dir.LayoutSize(childLayout) = clampedSize;
 
                     continue;
                 }
 
-                dir.LayoutSize(childLayout) = (int)size;
+                dir.LayoutSize(childLayout) = size;
 
                 stars += length.Value;
             }
