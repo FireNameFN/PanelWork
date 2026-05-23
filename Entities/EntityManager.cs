@@ -1,17 +1,16 @@
 using System;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace PanelWork.Entities;
 
 public sealed class EntityManager {
-    int[] ids = new int[1];
+    int[] ids = new int[64];
 
-    int[] generations = new int[1];
+    int[] generations = new int[64];
 
     int next;
 
-    object[] maps = new object[1];
+    object[] maps = new object[ComponentRegistry.SoftCount];
 
     public EntityManager() {
         for(int i = 0; i < ids.Length; i++)
@@ -121,11 +120,8 @@ public sealed class EntityManager {
     ComponentMap<T> GetOrCreateMap<T>() where T : class, IComponent {
         int index = ComponentRegistry.GetIndex<T>();
 
-        if(maps.Length <= index) {
-            int size = (int)BitOperations.RoundUpToPowerOf2((uint)ComponentRegistry.Count);
-
-            Array.Resize(ref maps, size);
-        }
+        if(maps.Length <= index)
+            Array.Resize(ref maps, ComponentRegistry.SoftCount);
 
         ref object mapObj = ref maps[index];
 
