@@ -14,7 +14,7 @@ public readonly struct ComponentLookup<T> where T : class {
         if(entityManager.Deleted(entity))
             return null;
 
-        return componentMap.Get(entity.Id);
+        return componentMap.GetOrNull(entity.Id);
     }
 
     public bool TryGet(Entity entity, out T component) {
@@ -24,7 +24,7 @@ public readonly struct ComponentLookup<T> where T : class {
             return false;
         }
 
-        component = componentMap.Get(entity.Id);
+        component = componentMap.GetOrNull(entity.Id);
 
         return component is not null;
     }

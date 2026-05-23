@@ -1,3 +1,5 @@
+using PanelWork.Components;
+
 namespace PanelWork.Layouting;
 
 public struct LayoutUnit {

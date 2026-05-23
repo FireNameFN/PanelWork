@@ -65,10 +65,20 @@ public sealed class EntityManager {
         return component;
     }
 
+    public T EnsureComponent<T>(Entity entity) where T : class, IComponent, new() {
+        ComponentMap<T> map = GetOrCreateMap<T>();
+
+        ref T component = ref map.GetOrAllocate(entity.Id);
+
+        component ??= new();
+
+        return component;
+    }
+
     public void SetComponent<T>(Entity entity, T component) where T : class, IComponent {
         ComponentMap<T> map = GetOrCreateMap<T>();
 
-        map.Set(entity.Id, component);
+        map.GetOrAllocate(entity.Id) = component;
     }
 
     public bool TryGetComponent<T>(Entity entity, out T component) where T : class, IComponent {
@@ -80,7 +90,7 @@ public sealed class EntityManager {
         if(!TryGetMap(out ComponentMap<T> map))
             return false;
 
-        component = map.Get(entity.Id);
+        component = map.GetOrNull(entity.Id);
 
         return component is not null;
     }
@@ -89,7 +99,7 @@ public sealed class EntityManager {
         if(!TryGetMap(out ComponentMap<T> map))
             return null;
 
-        return map.Get(entity.Id);
+        return map.GetOrNull(entity.Id);
     }
 
     bool TryGetMap<T>(out ComponentMap<T> map) where T : class, IComponent {

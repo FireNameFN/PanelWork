@@ -3,7 +3,7 @@ using PanelWork.Entities;
 using PanelWork.Layouting;
 using PanelWork.Primitives;
 
-namespace PanelWork;
+namespace PanelWork.Components;
 
 public sealed class LayoutComponent : IComponent {
     public List<Entity> Children { get; set; } = [];

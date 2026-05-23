@@ -81,6 +81,18 @@ public sealed class App : IDisposable {
         renderPass = device.CreateRenderPass([colorAttachment, resolveAttachment], subpassDescriptionSpan);
     }
 
+    public AppWindow CreateWindow() {
+        AppWindow window = new(this);
+
+        windows.Add(window);
+
+        return window;
+    }
+
+    public Panel CreatePanel() {
+        return new(entityManager, entityManager.CreateEntity());
+    }
+
     public void Run() {
         while(true) {
             SDL.PollEvent(out SDL.Event e);

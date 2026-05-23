@@ -14,14 +14,33 @@ public struct Color {
     public float A;
 
     public static Color FromRgba(float r, float g, float b, float a) {
-        Color color = default;
+        return new() {
+            R = Gamma(r),
+            G = Gamma(g),
+            B = Gamma(b),
+            A = Gamma(a)
+        };
+    }
 
-        color.R = MathF.Pow(r, 2.2f);
-        color.G = MathF.Pow(g, 2.2f);
-        color.B = MathF.Pow(b, 2.2f);
-        color.A = MathF.Pow(a, 2.2f);
+    public static Color FromRgb(float r, float g, float b) {
+        return new() {
+            R = Gamma(r),
+            G = Gamma(g),
+            B = Gamma(b),
+            A = 1
+        };
+    }
 
-        return color;
+    static float Gamma(float value) {
+        return MathF.Pow(value, 2.2f);
+    }
+
+    public static implicit operator Color(int rgb) {
+        return FromRgb((rgb >> 16 & 0xFF) / 255f, (rgb >> 8 & 0xFF) / 255f, (rgb & 0xFF) / 255f);
+    }
+
+    public static implicit operator Color(uint argb) {
+        return FromRgba((argb >> 16 & 0xFF) / 255f, (argb >> 8 & 0xFF) / 255f, (argb & 0xFF) / 255f, (argb >> 24 & 0xFF) / 255f);
     }
 
     public static implicit operator Color(Vector4 color) {

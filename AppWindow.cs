@@ -1,3 +1,4 @@
+using PanelWork.Components;
 using PanelWork.Entities;
 using PanelWork.Layouting;
 using SDL3;
@@ -51,7 +52,7 @@ public sealed class AppWindow {
 
     public Entity Content { get; set; }
 
-    public AppWindow(App app) {
+    internal AppWindow(App app) {
         this.app = app;
 
         handle = SDL.CreateWindow("PanelWork", 1280, 720, SDL.WindowFlags.Resizable | SDL.WindowFlags.Vulkan);
