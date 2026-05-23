@@ -5,17 +5,17 @@ using SDL3;
 
 namespace PanelWork;
 
-public sealed unsafe class Icon : IDisposable {
+public sealed unsafe class OldIcon : IDisposable {
     public nint Handle { get; }
 
     readonly void* memory;
 
-    private Icon(nint handle, void* memory) {
+    private OldIcon(nint handle, void* memory) {
         Handle = handle;
         this.memory = memory;
     }
 
-    public static Icon CreateFromPixels(int width, int height, ReadOnlySpan<byte> span) {
+    public static OldIcon CreateFromPixels(int width, int height, ReadOnlySpan<byte> span) {
         void* memory = NativeMemory.Alloc((nuint)span.Length);
 
         fixed(byte* spanPointer = span)
@@ -26,7 +26,7 @@ public sealed unsafe class Icon : IDisposable {
         return new(surface, memory);
     }
 
-    public static bool TryCreateFromPng(ReadOnlySpan<byte> png, out Icon icon) {
+    public static bool TryCreateFromPng(ReadOnlySpan<byte> png, out OldIcon icon) {
         icon = null;
 
         if(!PngDecoder.TryDecodeHeader(png, out PngHeader header))

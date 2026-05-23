@@ -20,7 +20,7 @@ public sealed class App : IDisposable {
 
     internal readonly Command command;
 
-    internal List<AppWindow> windows = [];
+    internal List<Window> windows = [];
 
     public EntityManager entityManager = new();
 
@@ -81,8 +81,8 @@ public sealed class App : IDisposable {
         renderPass = device.CreateRenderPass([colorAttachment, resolveAttachment], subpassDescriptionSpan);
     }
 
-    public AppWindow CreateWindow() {
-        AppWindow window = new(this);
+    public Window CreateWindow() {
+        Window window = new(this);
 
         windows.Add(window);
 
@@ -101,7 +101,7 @@ public sealed class App : IDisposable {
                 SDL.EventType type = (SDL.EventType)e.Type;
 
                 if(type == SDL.EventType.WindowPixelSizeChanged) {
-                    foreach(AppWindow window in windows)
+                    foreach(Window window in windows)
                         window.Resize();
                 }
 
@@ -109,7 +109,7 @@ public sealed class App : IDisposable {
                     return;
             } while(SDL.PollEvent(out e));
 
-            foreach(AppWindow window in windows)
+            foreach(Window window in windows)
                 window.Update();
         }
     }
