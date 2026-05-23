@@ -1,6 +1,6 @@
 using PanelWork.Primitives;
 
-namespace PanelWork;
+namespace PanelWork.Facades;
 
 public sealed class RectFacade : IFacade {
     public Color Color { get; set; }
