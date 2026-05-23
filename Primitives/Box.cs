@@ -1,6 +1,6 @@
-namespace PanelWork.Layouting;
+namespace PanelWork.Primitives;
 
-public struct LayoutBox {
+public struct Box {
     public int X;
 
     public int Y;
