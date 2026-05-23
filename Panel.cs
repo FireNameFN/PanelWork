@@ -11,7 +11,13 @@ public readonly struct Panel(EntityManager entityManager, Entity entity) {
         return new(EntityManager, EntityManager.CreateEntity());
     }
 
-    public T EnsureComponent<T>() where T : class, IComponent, new() {
+    public T Ensure<T>() where T : class, IComponent, new() {
         return EntityManager.EnsureComponent<T>(Entity);
+    }
+
+    public Panel Set<T>(T component) where T : class, IComponent {
+        EntityManager.SetComponent(Entity, component);
+
+        return this;
     }
 }

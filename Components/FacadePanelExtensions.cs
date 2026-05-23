@@ -5,7 +5,7 @@ namespace PanelWork.Components;
 public static class FacadePanelExtensions {
     extension(Panel panel) {
         public Panel Facade(IFacade facade) {
-            FacadeComponent layout = panel.EnsureComponent<FacadeComponent>();
+            FacadeComponent layout = panel.Ensure<FacadeComponent>();
 
             layout.Facade = facade;
 

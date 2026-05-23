@@ -63,7 +63,7 @@ public static class LayoutPanelExtensions {
         }
 
         LayoutComponent Ensure() {
-            return panel.EnsureComponent<LayoutComponent>();
+            return panel.Ensure<LayoutComponent>();
         }
     }
 }

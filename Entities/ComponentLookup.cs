@@ -1,3 +1,5 @@
+using System;
+
 namespace PanelWork.Entities;
 
 public readonly struct ComponentLookup<T> where T : class {
@@ -10,22 +12,18 @@ public readonly struct ComponentLookup<T> where T : class {
         this.componentMap = componentMap;
     }
 
-    public T Get(Entity entity) {
-        if(entityManager.Deleted(entity))
-            return null;
-
-        return componentMap.GetOrNull(entity.Id);
-    }
-
     public bool TryGet(Entity entity, out T component) {
-        if(entityManager.Deleted(entity)) {
-            component = null;
-
-            return false;
-        }
+        entityManager.ThrowIfDeleted(entity);
 
         component = componentMap.GetOrNull(entity.Id);
 
         return component is not null;
+    }
+
+    public T Get(Entity entity) {
+        if(!TryGet(entity, out T component))
+            throw new InvalidOperationException("Entity does not have component.");
+
+        return component;
     }
 }

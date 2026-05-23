@@ -57,15 +57,9 @@ public sealed class EntityManager {
         return new(this, GetOrCreateMap<T>());
     }
 
-    public T AddComponent<T>(Entity entity) where T : class, IComponent, new() {
-        T component = new();
-
-        SetComponent(entity, component);
-
-        return component;
-    }
-
     public T EnsureComponent<T>(Entity entity) where T : class, IComponent, new() {
+        ThrowIfDeleted(entity);
+
         ComponentMap<T> map = GetOrCreateMap<T>();
 
         ref T component = ref map.GetOrAllocate(entity.Id);
@@ -76,19 +70,21 @@ public sealed class EntityManager {
     }
 
     public void SetComponent<T>(Entity entity, T component) where T : class, IComponent {
+        ThrowIfDeleted(entity);
+
         ComponentMap<T> map = GetOrCreateMap<T>();
 
         map.GetOrAllocate(entity.Id) = component;
     }
 
     public bool TryGetComponent<T>(Entity entity, out T component) where T : class, IComponent {
-        component = null;
+        ThrowIfDeleted(entity);
 
-        if(Deleted(entity))
-            return false;
+        if(!TryGetMap(out ComponentMap<T> map)) {
+            component = null;
 
-        if(!TryGetMap(out ComponentMap<T> map))
             return false;
+        }
 
         component = map.GetOrNull(entity.Id);
 
@@ -96,10 +92,15 @@ public sealed class EntityManager {
     }
 
     public T GetComponent<T>(Entity entity) where T : class, IComponent {
-        if(!TryGetMap(out ComponentMap<T> map))
-            return null;
+        if(!TryGetComponent(entity, out T component))
+            throw new InvalidOperationException("Entity does not have component.");
 
-        return map.GetOrNull(entity.Id);
+        return component;
+    }
+
+    public void ThrowIfDeleted(Entity entity) {
+        if(Deleted(entity))
+            throw new InvalidOperationException("Entity is deleted.");
     }
 
     bool TryGetMap<T>(out ComponentMap<T> map) where T : class, IComponent {
