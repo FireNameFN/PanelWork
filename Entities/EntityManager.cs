@@ -110,11 +110,12 @@ public sealed class EntityManager {
         if(maps.Length <= index)
             return false;
 
-        object mapObj = maps[index];
+        if(maps[index] is null)
+            return false;
 
-        map = (ComponentMap<T>)mapObj;
+        map = (ComponentMap<T>)maps[index];
 
-        return map is not null;
+        return true;
     }
 
     ComponentMap<T> GetOrCreateMap<T>() where T : class, IComponent {
@@ -123,16 +124,13 @@ public sealed class EntityManager {
         if(maps.Length <= index)
             Array.Resize(ref maps, ComponentRegistry.SoftCount);
 
-        ref object mapObj = ref maps[index];
+        if(maps[index] is not null)
+            return (ComponentMap<T>)maps[index];
 
-        if(mapObj is null) {
-            ComponentMap<T> map = new();
+        ComponentMap<T> map = new();
 
-            mapObj = map;
+        maps[index] = map;
 
-            return map;
-        }
-
-        return (ComponentMap<T>)mapObj;
+        return map;
     }
 }
