@@ -35,13 +35,6 @@ public readonly struct LayoutDirection {
         return ref unit.MinHeight;
     }
 
-    public ref int Max(ref LayoutUnit unit) {
-        if(IsHorizontal)
-            return ref unit.MaxWidth;
-
-        return ref unit.MaxHeight;
-    }
-
     public ref int Available(ref LayoutUnit unit) {
         if(IsHorizontal)
             return ref unit.AvailableWidth;

@@ -9,10 +9,6 @@ public struct LayoutUnit {
 
     public int MinHeight;
 
-    public int MaxWidth;
-
-    public int MaxHeight;
-
     public int AvailableWidth;
 
     public int AvailableHeight;

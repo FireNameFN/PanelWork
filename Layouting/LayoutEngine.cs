@@ -31,15 +31,7 @@ public sealed class LayoutEngine(App app) {
 
         index = 0;
 
-        UpdateMaxSize(LayoutDirection.Horizontal, ref index);
-
-        index = 0;
-
         UpdateMinSize(LayoutDirection.Vertical, ref index);
-
-        index = 0;
-
-        UpdateMaxSize(LayoutDirection.Vertical, ref index);
 
         index = 0;
 
@@ -115,33 +107,6 @@ public sealed class LayoutEngine(App app) {
         dir.Available(ref units[entityIndex]) = totalSize - size;
     }
 
-    void UpdateMaxSize(LayoutDirection dir, ref int index) {
-        int entityIndex = index++;
-
-        LayoutComponent layout = units[entityIndex].Layout;
-
-        int size = 0;
-
-        for(int i = 0; i < layout.Children.Count; i++) {
-            int childIndex = index;
-
-            UpdateMaxSize(dir, ref index);
-
-            int max = dir.Max(ref units[childIndex]);
-
-            dir.SumOrMax(layout.Layout, max, ref size);
-        }
-
-        if(dir.Is(layout.Layout))
-            size += layout.Gap * (layout.Children.Count - 1);
-
-        size += dir.Size(layout.Padding);
-
-        int totalSize = Math.Max(dir.Min(ref units[entityIndex]), Math.Max(dir.Max(layout), size));
-
-        dir.Max(ref units[entityIndex]) = totalSize;
-    }
-
     void UpdateSize(LayoutDirection dir, ref int index) {
         int entityIndex = index++;
 
@@ -202,10 +167,10 @@ public sealed class LayoutEngine(App app) {
 
                 int min = dir.Min(ref units[childIndex]);
 
-                int max = dir.Max(ref units[childIndex]);
+                int max = dir.Max(childLayout);
 
                 if(size <= min || size >= max) {
-                    int clampedSize = Math.Clamp(size, min, max);
+                    int clampedSize = Math.Max(min, Math.Min(max, size));
 
                     passAvailable -= clampedSize;
 

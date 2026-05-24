@@ -13,10 +13,42 @@ public static class LayoutPanelExtensions {
             return panel;
         }
 
+        public Panel MinWidth(int width) {
+            LayoutComponent layout = panel.Ensure();
+
+            layout.MinWidth = width;
+
+            return panel;
+        }
+
+        public Panel MinHeight(int height) {
+            LayoutComponent layout = panel.Ensure();
+
+            layout.MinHeight = height;
+
+            return panel;
+        }
+
         public Panel Max(int width, int height) {
             LayoutComponent layout = panel.Ensure();
 
             layout.MaxWidth = width;
+            layout.MaxHeight = height;
+
+            return panel;
+        }
+
+        public Panel MaxWidth(int width) {
+            LayoutComponent layout = panel.Ensure();
+
+            layout.MaxWidth = width;
+
+            return panel;
+        }
+
+        public Panel MaxHeight(int height) {
+            LayoutComponent layout = panel.Ensure();
+
             layout.MaxHeight = height;
 
             return panel;
