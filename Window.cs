@@ -80,8 +80,6 @@ public sealed class Window {
 
         fence = app.device.CreateFence();
 
-        app.windows.Add(this);
-
         ShaderBuilder builder = new(app.device);
 
         VertexShaderLayout vertexShader = builder.BuildVertex();
@@ -102,9 +100,9 @@ public sealed class Window {
 
         layoutEngine = new(app);
 
-        layoutLookup = app.entityManager.GetLookup<LayoutComponent>();
+        layoutLookup = app.EntityManager.GetLookup<LayoutComponent>();
 
-        facadeLookup = app.entityManager.GetLookup<FacadeComponent>();
+        facadeLookup = app.EntityManager.GetLookup<FacadeComponent>();
     }
 
     public void Resize() {

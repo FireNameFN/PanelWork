@@ -1,7 +1,7 @@
 namespace PanelWork.Entities;
 
 public readonly struct Entity(int id, int generation) {
-    public int Id { get; } = id;
+    public readonly int Id = id;
 
-    public int Generation { get; } = generation;
+    public readonly int Generation = generation;
 }

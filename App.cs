@@ -20,9 +20,9 @@ public sealed class App : IDisposable {
 
     internal readonly Command command;
 
-    internal List<Window> windows = [];
+    readonly List<Window> windows = [];
 
-    public EntityManager entityManager = new();
+    public EntityManager EntityManager { get; } = new();
 
     public App() {
         //SDL.SetHint("SDL_VIDEO_DRIVER", "x11");
@@ -90,7 +90,7 @@ public sealed class App : IDisposable {
     }
 
     public Panel CreatePanel() {
-        return new(entityManager, entityManager.CreateEntity());
+        return new(EntityManager, EntityManager.CreateEntity());
     }
 
     public void Run() {

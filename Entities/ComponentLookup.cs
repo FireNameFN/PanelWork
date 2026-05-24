@@ -2,15 +2,10 @@ using System;
 
 namespace PanelWork.Entities;
 
-public readonly struct ComponentLookup<T> where T : class {
-    readonly EntityManager entityManager;
+public readonly struct ComponentLookup<T>(EntityManager entityManager, ComponentMap<T> componentMap) where T : class {
+    readonly EntityManager entityManager = entityManager;
 
-    readonly ComponentMap<T> componentMap;
-
-    internal ComponentLookup(EntityManager entityManager, ComponentMap<T> componentMap) {
-        this.entityManager = entityManager;
-        this.componentMap = componentMap;
-    }
+    readonly ComponentMap<T> componentMap = componentMap;
 
     public bool TryGet(Entity entity, out T component) {
         entityManager.ThrowIfDeleted(entity);
