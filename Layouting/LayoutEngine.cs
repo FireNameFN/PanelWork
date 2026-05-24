@@ -16,7 +16,7 @@ public sealed class LayoutEngine(App app) {
 
     int frames = 0;
 
-    public void Update(Entity entity) {
+    public void Update(Entity entity, int width, int height) {
         long t1 = Stopwatch.GetTimestamp();
 
         LayoutComponent layout = layoutLookup.Get(entity);
@@ -32,6 +32,9 @@ public sealed class LayoutEngine(App app) {
         index = 0;
 
         UpdateMinSize(LayoutDirection.Vertical, ref index);
+
+        layout.LayoutBox.Width = PanelMath.Clamp(width, units[0].MinWidth, layout.MaxWidth);
+        layout.LayoutBox.Height = PanelMath.Clamp(height, units[0].MinHeight, layout.MaxHeight);
 
         index = 0;
 
@@ -170,11 +173,11 @@ public sealed class LayoutEngine(App app) {
                 int max = dir.Max(childLayout);
 
                 if(size <= min || size >= max) {
-                    int clampedSize = Math.Max(min, Math.Min(max, size));
+                    size = PanelMath.Clamp(size, min, max);
 
-                    passAvailable -= clampedSize;
+                    passAvailable -= size;
 
-                    dir.LayoutSize(childLayout) = clampedSize;
+                    dir.LayoutSize(childLayout) = size;
 
                     continue;
                 }

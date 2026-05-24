@@ -151,7 +151,7 @@ public sealed class Window {
             return;
         }
 
-        layoutEngine.Update(Content);
+        layoutEngine.Update(Content, presenter.Width, presenter.Height);
 
         UpdateDraw(index);
     }
