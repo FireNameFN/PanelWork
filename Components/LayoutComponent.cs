@@ -13,13 +13,13 @@ public sealed class LayoutComponent : IComponent {
 
     public int MinHeight { get; set; }
 
-    public int MaxWidth { get; set; } = int.MaxValue;
+    public int MaxWidth { get; set; }
 
-    public int MaxHeight { get; set; } = int.MaxValue;
+    public int MaxHeight { get; set; }
 
-    public Length Width { get; set; }
+    public double StarWidth { get; set; }
 
-    public Length Height { get; set; }
+    public double StarHeight { get; set; }
 
     public Side Padding { get; set; }
 

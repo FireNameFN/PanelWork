@@ -54,18 +54,45 @@ public static class LayoutPanelExtensions {
             return panel;
         }
 
-        public Panel StarWidth(double star = 1) {
+        public Panel Star(double width, double height) {
             LayoutComponent layout = panel.Ensure();
 
-            layout.Width = Length.Star(star);
+            layout.StarWidth = width;
+            layout.StarHeight = height;
 
             return panel;
         }
 
-        public Panel StarHeight(double star = 1) {
+        public Panel StarWidth(double star) {
             LayoutComponent layout = panel.Ensure();
 
-            layout.Height = Length.Star(star);
+            layout.StarWidth = star;
+
+            return panel;
+        }
+
+        public Panel StarHeight(double star) {
+            LayoutComponent layout = panel.Ensure();
+
+            layout.StarHeight = star;
+
+            return panel;
+        }
+
+        public Panel GrowWidth() {
+            LayoutComponent layout = panel.Ensure();
+
+            layout.MaxWidth = int.MaxValue;
+            layout.StarWidth = 1;
+
+            return panel;
+        }
+
+        public Panel GrowHeight() {
+            LayoutComponent layout = panel.Ensure();
+
+            layout.MaxHeight = int.MaxValue;
+            layout.StarHeight = 1;
 
             return panel;
         }

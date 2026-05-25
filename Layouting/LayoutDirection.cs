@@ -50,8 +50,8 @@ public readonly struct LayoutDirection {
         return IsHorizontal ? layout.MaxWidth : layout.MaxHeight;
     }
 
-    public Length Size(LayoutComponent layout) {
-        return IsHorizontal ? layout.Width : layout.Height;
+    public double Star(LayoutComponent layout) {
+        return IsHorizontal ? layout.StarWidth : layout.StarHeight;
     }
 
     public ref int LayoutSize(LayoutComponent unit) {

@@ -1,16 +1,14 @@
 using System;
 using System.Diagnostics;
-using System.Numerics;
 using PanelWork.Components;
 using PanelWork.Entities;
-using PanelWork.Primitives;
 
 namespace PanelWork.Layouting;
 
 public sealed class LayoutEngine(App app) {
     readonly ComponentLookup<LayoutComponent> layoutLookup = app.EntityManager.GetLookup<LayoutComponent>();
 
-    LayoutUnit[] units = [];
+    LayoutUnit[] units = new LayoutUnit[4];
 
     long time = 0;
 
@@ -71,11 +69,8 @@ public sealed class LayoutEngine(App app) {
         foreach(Entity child in layout.Children)
             Index(child, ref index);
 
-        if(units.Length <= index) {
-            int size = (int)BitOperations.RoundUpToPowerOf2((uint)index);
-
-            Array.Resize(ref units, size);
-        }
+        if(units.Length <= index)
+            Array.Resize(ref units, units.Length * 2);
 
         units[entityIndex].Layout = layout;
     }
@@ -127,14 +122,14 @@ public sealed class LayoutEngine(App app) {
 
             LayoutComponent childLayout = units[childIndex].Layout;
 
-            Length length = dir.Size(childLayout);
+            double star = dir.Star(childLayout);
 
-            if(length.Unit != LengthUnit.Star)
+            if(star <= 0)
                 continue;
 
             available += dir.Min(ref units[childIndex]);
 
-            stars += length.Value;
+            stars += star;
         }
 
         if(stars <= 0)
@@ -161,12 +156,12 @@ public sealed class LayoutEngine(App app) {
 
                 LayoutComponent childLayout = units[childIndex].Layout;
 
-                Length length = dir.Size(childLayout);
+                double star = dir.Star(childLayout);
 
-                if(length.Unit != LengthUnit.Star)
+                if(star <= 0)
                     continue;
 
-                int size = (int)(length.Value * pixelsPerStar);
+                int size = (int)(star * pixelsPerStar);
 
                 int min = dir.Min(ref units[childIndex]);
 
@@ -184,7 +179,7 @@ public sealed class LayoutEngine(App app) {
 
                 dir.LayoutSize(childLayout) = size;
 
-                stars += length.Value;
+                stars += star;
             }
 
             if(passAvailable <= 0)
