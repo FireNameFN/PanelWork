@@ -116,6 +116,8 @@ public static class LayoutPanelExtensions {
         public Panel Add(Panel child) {
             LayoutComponent layout = panel.Ensure();
 
+            layout.Children ??= [];
+
             layout.Children.Add(child.Entity);
 
             return panel;

@@ -66,13 +66,15 @@ public sealed class LayoutEngine(App app) {
 
         LayoutComponent layout = layoutLookup.Get(entity);
 
-        foreach(Entity child in layout.Children)
-            Index(child, ref index);
+        if(layout.Children is not null)
+            foreach(Entity child in layout.Children)
+                Index(child, ref index);
 
         if(units.Length <= index)
             Array.Resize(ref units, units.Length * 2);
 
         units[entityIndex].Layout = layout;
+        units[entityIndex].ChildrenCount = layout.Children?.Count ?? 0;
     }
 
     void UpdateMinSize(LayoutDirection dir, ref int index) {
@@ -82,7 +84,7 @@ public sealed class LayoutEngine(App app) {
 
         int size = 0;
 
-        for(int i = 0; i < layout.Children.Count; i++) {
+        for(int i = 0; i < units[entityIndex].ChildrenCount; i++) {
             int childIndex = index;
 
             UpdateMinSize(dir, ref index);
@@ -93,7 +95,7 @@ public sealed class LayoutEngine(App app) {
         }
 
         if(dir.Is(layout.Layout))
-            size += layout.Gap * (layout.Children.Count - 1);
+            size += layout.Gap * (units[entityIndex].ChildrenCount - 1);
 
         size += dir.Size(layout.Padding);
 
@@ -108,8 +110,6 @@ public sealed class LayoutEngine(App app) {
     void UpdateSize(LayoutDirection dir, ref int index) {
         int entityIndex = index++;
 
-        LayoutComponent layout = units[entityIndex].Layout;
-
         int available = dir.Available(ref units[entityIndex]);
 
         if(available <= 0)
@@ -117,7 +117,7 @@ public sealed class LayoutEngine(App app) {
 
         double stars = 0;
 
-        for(int i = 0; i < layout.Children.Count; i++) {
+        for(int i = 0; i < units[entityIndex].ChildrenCount; i++) {
             int childIndex = index + i;
 
             LayoutComponent childLayout = units[childIndex].Layout;
@@ -151,7 +151,7 @@ public sealed class LayoutEngine(App app) {
 
             stars = 0;
 
-            for(int i = 0; i < layout.Children.Count; i++) {
+            for(int i = 0; i < units[entityIndex].ChildrenCount; i++) {
                 int childIndex = index + i;
 
                 LayoutComponent childLayout = units[childIndex].Layout;
@@ -189,7 +189,7 @@ public sealed class LayoutEngine(App app) {
                 break;
         }
 
-        for(int i = 0; i < layout.Children.Count; i++)
+        for(int i = 0; i < units[entityIndex].ChildrenCount; i++)
             UpdateSize(dir, ref index);
     }
 
@@ -201,7 +201,7 @@ public sealed class LayoutEngine(App app) {
         int x = layout.LayoutBox.X + layout.Padding.Left;
         int y = layout.LayoutBox.Y + layout.Padding.Top;
 
-        for(int i = 0; i < layout.Children.Count; i++) {
+        for(int i = 0; i < units[entityIndex].ChildrenCount; i++) {
             LayoutComponent childLayout = units[index].Layout;
 
             childLayout.LayoutBox.X = x;
