@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.Marshalling;
 using PanelWork.Entities;
-using SDL3;
+using SDL;
 using Thermal.Core;
 using Thermal.Extensions;
 using Thermal.ThVk;
@@ -24,16 +25,23 @@ public sealed class App : IDisposable {
 
     public EntityManager EntityManager { get; } = new();
 
-    public App() {
+    public unsafe App() {
         //SDL.SetHint("SDL_VIDEO_DRIVER", "x11");
 
-        SDL.SetHint("SDL_VIDEO_DRIVER", "wayland,x11,cocoa,windows");
+        SDL_SetHint("SDL_VIDEO_DRIVER", "wayland,x11,cocoa,windows");
 
-        SDL.Init(SDL.InitFlags.Video);
+        SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO);
 
-        SDL.VulkanLoadLibrary(null);
+        SDL_Vulkan_LoadLibrary((byte*)null);
 
-        string[] extensions = SDL.VulkanGetInstanceExtensions(out _);
+        uint extensionsCount;
+
+        byte** extensionsPointer = SDL_Vulkan_GetInstanceExtensions(&extensionsCount);
+
+        string[] extensions = new string[extensionsCount];
+
+        for(int i = 0; i < extensionsCount; i++)
+            extensions[i] = Utf8StringMarshaller.ConvertToManaged(extensionsPointer[i]);
 
         ThInstance instance = ThInstance.Create(VkVersion.Version_1_2, ["VK_LAYER_KHRONOS_validation"], extensions);
 
@@ -93,21 +101,23 @@ public sealed class App : IDisposable {
         return new(EntityManager, EntityManager.CreateEntity());
     }
 
-    public void Run() {
+    public unsafe void Run() {
         while(true) {
-            SDL.PollEvent(out SDL.Event e);
+            SDL_Event e;
+
+            SDL_PollEvent(&e);
 
             do {
-                SDL.EventType type = (SDL.EventType)e.Type;
+                SDL_EventType type = e.Type;
 
-                if(type == SDL.EventType.WindowPixelSizeChanged) {
+                if(type == SDL_EventType.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
                     foreach(Window window in windows)
                         window.Resize();
                 }
 
-                if(type == SDL.EventType.WindowCloseRequested)
+                if(type == SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED)
                     return;
-            } while(SDL.PollEvent(out e));
+            } while(SDL_PollEvent(&e));
 
             foreach(Window window in windows)
                 window.Update();
@@ -115,10 +125,10 @@ public sealed class App : IDisposable {
     }
 
     public void Dispose() {
-        SDL.Quit();
+        SDL_Quit();
     }
 
-    static bool IsPresentationSupported(ThPhysicalDevice physicalDevice, uint queueFamily, VkQueueFlags flags) {
-        return SDL.VulkanGetPresentationSupport(physicalDevice.Instance.Instance, physicalDevice.Handle, queueFamily);
+    static unsafe bool IsPresentationSupported(ThPhysicalDevice physicalDevice, uint queueFamily, VkQueueFlags flags) {
+        return SDL_Vulkan_GetPresentationSupport((VkInstance_T*)physicalDevice.Instance.Instance.Handle, (VkPhysicalDevice_T*)physicalDevice.Handle.Handle, queueFamily);
     }
 }

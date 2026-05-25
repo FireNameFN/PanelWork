@@ -1,7 +1,7 @@
 using PanelWork.Components;
 using PanelWork.Entities;
 using PanelWork.Layouting;
-using SDL3;
+using SDL;
 using Thermal.Core;
 using Thermal.Extensions;
 using Thermal.Primitives;
@@ -11,8 +11,8 @@ using Vortice.Vulkan;
 
 namespace PanelWork;
 
-public sealed class Window {
-    readonly nint handle;
+public sealed unsafe class Window {
+    readonly SDL_Window* handle;
 
     readonly App app;
 
@@ -55,9 +55,11 @@ public sealed class Window {
     internal Window(App app) {
         this.app = app;
 
-        handle = SDL.CreateWindow("PanelWork", 1280, 720, SDL.WindowFlags.Resizable | SDL.WindowFlags.Vulkan);
+        handle = SDL_CreateWindow("PanelWork", 1280, 720, SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL_WindowFlags.SDL_WINDOW_VULKAN);
 
-        SDL.VulkanCreateSurface(handle, app.physicalDevice.Instance.Instance, 0, out nint surface);
+        VkSurfaceKHR_T* surface;
+
+        SDL_Vulkan_CreateSurface(handle, (VkInstance_T*)app.physicalDevice.Instance.Instance.Handle, null, &surface);
 
         presenter = new(app.physicalDevice, app.queue, (ulong)surface) {
             Usage = VkImageUsageFlags.ColorAttachment,
@@ -120,7 +122,10 @@ public sealed class Window {
             app.queue.WaitIdle();
         }
 
-        SDL.GetWindowSizeInPixels(handle, out int width, out int height);
+        int width;
+        int height;
+
+        SDL_GetWindowSizeInPixels(handle, &width, &height);
 
         presenter.SetSize(width, height);
 
