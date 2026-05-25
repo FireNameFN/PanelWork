@@ -44,8 +44,6 @@ public sealed unsafe class Window {
 
     readonly Graphics graphics;
 
-    readonly LayoutEngine layoutEngine;
-
     readonly ComponentLookup<LayoutComponent> layoutLookup;
 
     readonly ComponentLookup<FacadeComponent> facadeLookup;
@@ -99,8 +97,6 @@ public sealed unsafe class Window {
             drawHandle = drawHandle,
             pipeline = pipeline
         };
-
-        layoutEngine = new(app);
 
         layoutLookup = app.EntityManager.GetLookup<LayoutComponent>();
 
@@ -156,7 +152,7 @@ public sealed unsafe class Window {
             return;
         }
 
-        layoutEngine.Update(Content, presenter.Width, presenter.Height);
+        app.layoutEngine.Update(Content, presenter.Width, presenter.Height);
 
         UpdateDraw(index);
     }

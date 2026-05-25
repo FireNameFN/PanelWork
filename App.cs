@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.Marshalling;
 using PanelWork.Entities;
+using PanelWork.Layouting;
 using SDL;
 using Thermal.Core;
 using Thermal.Extensions;
@@ -20,6 +21,8 @@ public sealed class App : IDisposable {
     internal readonly ThRenderPass renderPass;
 
     internal readonly Command command;
+
+    internal readonly LayoutEngine layoutEngine;
 
     readonly List<Window> windows = [];
 
@@ -87,6 +90,8 @@ public sealed class App : IDisposable {
         };
 
         renderPass = device.CreateRenderPass([colorAttachment, resolveAttachment], subpassDescriptionSpan);
+
+        layoutEngine = new(this);
     }
 
     public Window CreateWindow() {
