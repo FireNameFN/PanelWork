@@ -48,7 +48,7 @@ public sealed unsafe class Window {
 
     readonly ComponentLookup<FacadeComponent> facadeLookup;
 
-    public Entity Content { get; set; }
+    public Entity Panel { get; set; }
 
     internal Window(App app) {
         this.app = app;
@@ -152,7 +152,7 @@ public sealed unsafe class Window {
             return;
         }
 
-        app.layoutEngine.Update(Content, presenter.Width, presenter.Height);
+        app.layoutEngine.Update(Panel, presenter.Width, presenter.Height);
 
         UpdateDraw(index);
     }
@@ -170,7 +170,7 @@ public sealed unsafe class Window {
 
         drawHandle.WithInstance([Matrix.CreateFrom(Matrix.CreateViewport(presenter.Width, presenter.Height))]);
 
-        UpdateDrawEntity(Content);
+        UpdateDrawEntity(Panel);
 
         drawHandle.Flush();
 
