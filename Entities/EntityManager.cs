@@ -8,12 +8,12 @@ public sealed class EntityManager {
 
     int[] generations = new int[64];
 
-    int next;
+    int next = 1;
 
     object[] maps = new object[ComponentRegistry.SoftCount];
 
     public EntityManager() {
-        for(int i = 0; i < ids.Length; i++)
+        for(int i = 1; i < ids.Length; i++)
             ids[i] = i + 1;
     }
 
@@ -37,6 +37,8 @@ public sealed class EntityManager {
     }
 
     public void DeleteEntity(Entity entity) {
+        ThrowIfDeleted(entity);
+
         ids[entity.Id] = next;
 
         next = entity.Id;
