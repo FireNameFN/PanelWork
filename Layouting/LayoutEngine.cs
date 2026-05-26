@@ -66,8 +66,8 @@ public sealed class LayoutEngine(App app) {
 
         LayoutComponent layout = layoutLookup.Get(entity);
 
-        for(int i = 0; i < layout.ChildrenCount; i++)
-            Index(layout.Children[i], ref index);
+        for(int i = 0; i < layout.PanelCount; i++)
+            Index(layout.Panels[i], ref index);
 
         if(units.Length <= index)
             Array.Resize(ref units, units.Length * 2);
@@ -82,7 +82,7 @@ public sealed class LayoutEngine(App app) {
 
         int size = 0;
 
-        for(int i = 0; i < layout.ChildrenCount; i++) {
+        for(int i = 0; i < layout.PanelCount; i++) {
             int childIndex = index;
 
             UpdateMinSize(dir, ref index);
@@ -93,7 +93,7 @@ public sealed class LayoutEngine(App app) {
         }
 
         if(dir.Is(layout.Layout))
-            size += layout.Gap * (layout.ChildrenCount - 1);
+            size += layout.Gap * (layout.PanelCount - 1);
 
         size += dir.Size(layout.Padding);
 
@@ -117,7 +117,7 @@ public sealed class LayoutEngine(App app) {
 
         double stars = 0;
 
-        for(int i = 0; i < layout.ChildrenCount; i++) {
+        for(int i = 0; i < layout.PanelCount; i++) {
             int childIndex = index + i;
 
             LayoutComponent childLayout = units[childIndex].Layout;
@@ -151,7 +151,7 @@ public sealed class LayoutEngine(App app) {
 
             stars = 0;
 
-            for(int i = 0; i < layout.ChildrenCount; i++) {
+            for(int i = 0; i < layout.PanelCount; i++) {
                 int childIndex = index + i;
 
                 LayoutComponent childLayout = units[childIndex].Layout;
@@ -189,7 +189,7 @@ public sealed class LayoutEngine(App app) {
                 break;
         }
 
-        for(int i = 0; i < layout.ChildrenCount; i++)
+        for(int i = 0; i < layout.PanelCount; i++)
             UpdateSize(dir, ref index);
     }
 
@@ -201,7 +201,7 @@ public sealed class LayoutEngine(App app) {
         int x = layout.LayoutBox.X + layout.Padding.Left;
         int y = layout.LayoutBox.Y + layout.Padding.Top;
 
-        for(int i = 0; i < layout.ChildrenCount; i++) {
+        for(int i = 0; i < layout.PanelCount; i++) {
             LayoutComponent childLayout = units[index].Layout;
 
             childLayout.LayoutBox.X = x;

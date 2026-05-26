@@ -4,9 +4,9 @@ using PanelWork.Primitives;
 namespace PanelWork.Components;
 
 public sealed class LayoutComponent : IComponent {
-    public Entity[] Children { get; set; }
+    public Entity[] Panels { get; set; }
 
-    public int ChildrenCount { get; set; }
+    public int PanelCount { get; set; }
 
     public LayoutType Layout { get; set; }
 

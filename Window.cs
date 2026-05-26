@@ -205,7 +205,7 @@ public sealed unsafe class Window {
         if(facadeLookup.TryGet(entity, out FacadeComponent facade))
             facade.Facade.Draw(graphics, layout.LayoutBox);
 
-        for(int i = 0; i < layout.ChildrenCount; i++)
-            UpdateDrawEntity(layout.Children[i]);
+        for(int i = 0; i < layout.PanelCount; i++)
+            UpdateDrawEntity(layout.Panels[i]);
     }
 }

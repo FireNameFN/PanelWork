@@ -115,46 +115,46 @@ public static class LayoutPanelExtensions {
             return panel;
         }
 
-        public Panel Children(params ReadOnlySpan<Panel> children) {
+        public Panel Panels(params ReadOnlySpan<Panel> panels) {
             LayoutComponent layout = panel.Ensure();
 
-            if(layout.Children is null || layout.Children.Length < children.Length)
-                layout.Children = new Entity[children.Length];
+            if(layout.Panels is null || layout.Panels.Length < panels.Length)
+                layout.Panels = new Entity[panels.Length];
 
-            for(int i = 0; i < children.Length; i++)
-                layout.Children[i] = children[i].Entity;
+            for(int i = 0; i < panels.Length; i++)
+                layout.Panels[i] = panels[i].Entity;
 
-            layout.ChildrenCount = children.Length;
+            layout.PanelCount = panels.Length;
 
             return panel;
         }
 
-        public Panel AddChild(Panel child) {
+        public Panel AddPanel(Panel subpanel) {
             LayoutComponent layout = panel.Ensure();
 
-            layout.Children ??= new Entity[4];
+            layout.Panels ??= new Entity[4];
 
-            if(layout.Children.Length <= layout.ChildrenCount) {
-                Entity[] children = layout.Children;
+            if(layout.Panels.Length <= layout.PanelCount) {
+                Entity[] panels = layout.Panels;
 
-                Array.Resize(ref children, children.Length * 2);
+                Array.Resize(ref panels, panels.Length * 2);
 
-                layout.Children = children;
+                layout.Panels = panels;
             }
 
-            layout.Children[layout.ChildrenCount++] = child.Entity;
+            layout.Panels[layout.PanelCount++] = subpanel.Entity;
 
             return panel;
         }
 
-        public Panel RemoveChild(int index) {
+        public Panel RemovePanel(int index) {
             LayoutComponent layout = panel.Ensure();
 
             int nextIndex = index + 1;
 
-            layout.Children.AsSpan(nextIndex, layout.ChildrenCount - nextIndex).CopyTo(layout.Children.AsSpan(index));
+            layout.Panels.AsSpan(nextIndex, layout.PanelCount - nextIndex).CopyTo(layout.Panels.AsSpan(index));
 
-            layout.ChildrenCount--;
+            layout.PanelCount--;
 
             return panel;
         }
