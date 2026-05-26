@@ -1,11 +1,12 @@
-using System.Collections.Generic;
 using PanelWork.Entities;
 using PanelWork.Primitives;
 
 namespace PanelWork.Components;
 
 public sealed class LayoutComponent : IComponent {
-    public List<Entity> Children { get; set; }
+    public Entity[] Children { get; set; }
+
+    public int ChildrenCount { get; set; }
 
     public LayoutType Layout { get; set; }
 

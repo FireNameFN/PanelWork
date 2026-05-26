@@ -1,3 +1,5 @@
+using System;
+using PanelWork.Entities;
 using PanelWork.Primitives;
 
 namespace PanelWork.Components;
@@ -113,12 +115,46 @@ public static class LayoutPanelExtensions {
             return panel;
         }
 
-        public Panel Add(Panel child) {
+        public Panel Children(params ReadOnlySpan<Panel> children) {
             LayoutComponent layout = panel.Ensure();
 
-            layout.Children ??= [];
+            if(layout.Children is null || layout.Children.Length < children.Length)
+                layout.Children = new Entity[children.Length];
 
-            layout.Children.Add(child.Entity);
+            for(int i = 0; i < children.Length; i++)
+                layout.Children[i] = children[i].Entity;
+
+            layout.ChildrenCount = children.Length;
+
+            return panel;
+        }
+
+        public Panel AddChild(Panel child) {
+            LayoutComponent layout = panel.Ensure();
+
+            layout.Children ??= new Entity[4];
+
+            if(layout.Children.Length <= layout.ChildrenCount) {
+                Entity[] children = layout.Children;
+
+                Array.Resize(ref children, children.Length * 2);
+
+                layout.Children = children;
+            }
+
+            layout.Children[layout.ChildrenCount++] = child.Entity;
+
+            return panel;
+        }
+
+        public Panel RemoveChild(int index) {
+            LayoutComponent layout = panel.Ensure();
+
+            int nextIndex = index + 1;
+
+            layout.Children.AsSpan(nextIndex, layout.ChildrenCount - nextIndex).CopyTo(layout.Children.AsSpan(index));
+
+            layout.ChildrenCount--;
 
             return panel;
         }
