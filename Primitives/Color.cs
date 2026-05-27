@@ -13,30 +13,17 @@ public struct Color {
 
     public float A;
 
-    public static Color FromRgba(float r, float g, float b, float a) {
+    public static Color FromRgba(float r, float g, float b, float a = 1) {
         return new() {
             R = Gamma(r),
             G = Gamma(g),
             B = Gamma(b),
-            A = Gamma(a)
-        };
-    }
-
-    public static Color FromRgb(float r, float g, float b) {
-        return new() {
-            R = Gamma(r),
-            G = Gamma(g),
-            B = Gamma(b),
-            A = 1
+            A = a
         };
     }
 
     static float Gamma(float value) {
         return MathF.Pow(value, 2.2f);
-    }
-
-    public static implicit operator Color(int rgb) {
-        return FromRgb((rgb >> 16 & 0xFF) / 255f, (rgb >> 8 & 0xFF) / 255f, (rgb & 0xFF) / 255f);
     }
 
     public static implicit operator Color(uint argb) {

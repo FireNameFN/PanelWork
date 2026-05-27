@@ -1,5 +1,8 @@
+using System;
+using System.Runtime.CompilerServices;
 using PanelWork.Components;
 using PanelWork.Entities;
+using PanelWork.Facades;
 using PanelWork.Layouting;
 using SDL;
 using Thermal.Core;
@@ -47,6 +50,8 @@ public sealed unsafe class Window {
     readonly ComponentLookup<LayoutComponent> layoutLookup;
 
     readonly ComponentLookup<FacadeComponent> facadeLookup;
+
+    readonly ComponentLookup<ArchetypeComponent> archLookup;
 
     public Entity Panel { get; set; }
 
@@ -101,6 +106,8 @@ public sealed unsafe class Window {
         layoutLookup = app.EntityManager.GetLookup<LayoutComponent>();
 
         facadeLookup = app.EntityManager.GetLookup<FacadeComponent>();
+
+        archLookup = app.EntityManager.GetLookup<ArchetypeComponent>();
     }
 
     public void Resize() {
@@ -202,8 +209,14 @@ public sealed unsafe class Window {
     void UpdateDrawEntity(Entity entity) {
         LayoutComponent layout = layoutLookup.Get(entity);
 
-        if(facadeLookup.TryGet(entity, out FacadeComponent facade))
-            facade.Facade.Draw(graphics, layout.LayoutBox);
+        DrawEvent e = new() {
+            Graphics = graphics,
+            Box = layout.LayoutBox
+        };
+
+        if(archLookup.TryGet(entity, out ArchetypeComponent arch))
+            foreach(Event1Handler action in app.EntityManager.GetComponent<EventHandlerComponent<DrawEvent>>(arch.Event).Handlers)
+                action(entity, ref Unsafe.As<DrawEvent, Event>(ref e));
 
         for(int i = 0; i < layout.PanelCount; i++)
             UpdateDrawEntity(layout.Panels[i]);

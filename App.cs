@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.Marshalling;
+using PanelWork.Components;
 using PanelWork.Entities;
+using PanelWork.Facades;
 using PanelWork.Layouting;
 using SDL;
 using Thermal.Core;
@@ -27,6 +30,10 @@ public sealed class App : IDisposable {
     readonly List<Window> windows = [];
 
     public EntityManager EntityManager { get; } = new();
+
+    public Entity arch;
+
+    public ArchetypeComponent archComp;
 
     public unsafe App() {
         //SDL.SetHint("SDL_VIDEO_DRIVER", "x11");
@@ -92,6 +99,21 @@ public sealed class App : IDisposable {
         renderPass = device.CreateRenderPass([colorAttachment, resolveAttachment], subpassDescriptionSpan);
 
         layoutEngine = new(this);
+
+        arch = EntityManager.CreateEntity();
+
+        archComp = EntityManager.EnsureComponent<ArchetypeComponent>(arch);
+
+        archComp.Event = EntityManager.CreateEntity();
+
+        EventHandlerComponent<DrawEvent> drawHandlers = EntityManager.EnsureComponent<EventHandlerComponent<DrawEvent>>(archComp.Event);
+
+        drawHandlers.Handlers.Add((entity, ref e) => {
+            DrawEvent drawEvent = Unsafe.As<Event, DrawEvent>(ref e);
+
+            if(EntityManager.TryGetComponent(entity, out FacadeComponent facade))
+                facade.Facade.Draw(drawEvent.Graphics, drawEvent.Box);
+        });
     }
 
     public Window CreateWindow() {
