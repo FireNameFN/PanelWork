@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.Marshalling;
 using PanelWork.Components;
 using PanelWork.Entities;
 using PanelWork.Facades;
 using PanelWork.Layouting;
+using PanelWork.Panels;
 using SDL;
 using Thermal.Core;
 using Thermal.Extensions;
@@ -29,7 +29,7 @@ public sealed class App : IDisposable {
 
     readonly List<Window> windows = [];
 
-    public EntityManager EntityManager { get; } = new();
+    public PanelManager PanelManager { get; } = new();
 
     public Entity arch;
 
@@ -100,20 +100,19 @@ public sealed class App : IDisposable {
 
         layoutEngine = new(this);
 
-        arch = EntityManager.CreateEntity();
+        arch = PanelManager.EntityManager.CreateEntity();
 
-        archComp = EntityManager.EnsureComponent<ArchetypeComponent>(arch);
+        archComp = PanelManager.EntityManager.EnsureComponent<ArchetypeComponent>(arch);
 
-        archComp.Event = EntityManager.CreateEntity();
+        archComp.Event = PanelManager.EntityManager.CreateEntity();
 
-        EventHandlerComponent<DrawEvent> drawHandlers = EntityManager.EnsureComponent<EventHandlerComponent<DrawEvent>>(archComp.Event);
+        EventComponent<DrawEvent> drawHandlers = PanelManager.EntityManager.EnsureComponent<EventComponent<DrawEvent>>(archComp.Event);
 
-        drawHandlers.Handlers.Add((entity, ref e) => {
-            DrawEvent drawEvent = Unsafe.As<Event, DrawEvent>(ref e);
+        RectFacadeHandler handler = new();
 
-            if(EntityManager.TryGetComponent(entity, out FacadeComponent facade))
-                facade.Facade.Draw(drawEvent.Graphics, drawEvent.Box);
-        });
+        handler.Initialize(PanelManager);
+
+        drawHandlers.Handlers.Add(handler);
     }
 
     public Window CreateWindow() {
@@ -122,10 +121,6 @@ public sealed class App : IDisposable {
         windows.Add(window);
 
         return window;
-    }
-
-    public Panel CreatePanel() {
-        return new(EntityManager, EntityManager.CreateEntity());
     }
 
     public unsafe void Run() {

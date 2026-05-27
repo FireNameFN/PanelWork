@@ -1,9 +1,8 @@
 using System;
-using System.Runtime.CompilerServices;
+using System.Diagnostics;
 using PanelWork.Components;
 using PanelWork.Entities;
 using PanelWork.Facades;
-using PanelWork.Layouting;
 using SDL;
 using Thermal.Core;
 using Thermal.Extensions;
@@ -48,10 +47,6 @@ public sealed unsafe class Window {
     readonly Graphics graphics;
 
     readonly ComponentLookup<LayoutComponent> layoutLookup;
-
-    readonly ComponentLookup<FacadeComponent> facadeLookup;
-
-    readonly ComponentLookup<ArchetypeComponent> archLookup;
 
     public Entity Panel { get; set; }
 
@@ -103,11 +98,7 @@ public sealed unsafe class Window {
             pipeline = pipeline
         };
 
-        layoutLookup = app.EntityManager.GetLookup<LayoutComponent>();
-
-        facadeLookup = app.EntityManager.GetLookup<FacadeComponent>();
-
-        archLookup = app.EntityManager.GetLookup<ArchetypeComponent>();
+        layoutLookup = app.PanelManager.EntityManager.GetLookup<LayoutComponent>();
     }
 
     public void Resize() {
@@ -164,6 +155,10 @@ public sealed unsafe class Window {
         UpdateDraw(index);
     }
 
+    long time = 0;
+
+    int frames = 0;
+
     void UpdateDraw(uint index) {
         app.device.Handle.vkBeginCommandBuffer(commandBuffer.Handle, VkCommandBufferUsageFlags.OneTimeSubmit);
 
@@ -177,7 +172,20 @@ public sealed unsafe class Window {
 
         drawHandle.WithInstance([Matrix.CreateFrom(Matrix.CreateViewport(presenter.Width, presenter.Height))]);
 
+        long t1 = Stopwatch.GetTimestamp();
+
         UpdateDrawEntity(Panel);
+
+        long t2 = Stopwatch.GetTimestamp();
+
+        time += t2 - t1;
+
+        if(++frames >= 10000) {
+            Console.WriteLine(time * 10000d / Stopwatch.Frequency);
+
+            frames = 0;
+            time = 0;
+        }
 
         drawHandle.Flush();
 
@@ -214,9 +222,7 @@ public sealed unsafe class Window {
             Box = layout.LayoutBox
         };
 
-        if(archLookup.TryGet(entity, out ArchetypeComponent arch))
-            foreach(Event1Handler action in app.EntityManager.GetComponent<EventHandlerComponent<DrawEvent>>(arch.Event).Handlers)
-                action(entity, ref Unsafe.As<DrawEvent, Event>(ref e));
+        app.PanelManager.Emit(entity, ref e);
 
         for(int i = 0; i < layout.PanelCount; i++)
             UpdateDrawEntity(layout.Panels[i]);
