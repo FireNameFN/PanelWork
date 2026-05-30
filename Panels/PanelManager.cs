@@ -1,3 +1,4 @@
+using System;
 using PanelWork.Components;
 using PanelWork.Entities;
 
@@ -6,17 +7,15 @@ namespace PanelWork.Panels;
 public sealed class PanelManager {
     public EntityManager EntityManager { get; } = new();
 
+    ISingleton[] eventHandlers = new ISingleton[TypeRegistry<ISingleton>.SoftCount];
+
     readonly ComponentLookup<ArchetypeComponent> archetypeLookup;
 
     readonly ComponentLookup<LayoutComponent> layoutLookup;
 
-    readonly Entity handlerEntity;
-
     public PanelManager() {
         archetypeLookup = EntityManager.GetLookup<ArchetypeComponent>();
         layoutLookup = EntityManager.GetLookup<LayoutComponent>();
-
-        handlerEntity = EntityManager.CreateEntity();
     }
 
     public Panel CreatePanel() {
@@ -41,16 +40,21 @@ public sealed class PanelManager {
     }
 
     public IEventHandler<TEvent> GetHandler<TEventHandler, TEvent>() where TEventHandler : IEventHandler<TEvent>, new() {
-        HandlerComponent<TEvent> handler = EntityManager.EnsureComponent<HandlerComponent<TEvent>>(handlerEntity);
+        int index = TypeRegistry<ISingleton>.GetIndex<TEventHandler>();
 
-        if(handler.Handler is not null)
-            return handler.Handler;
+        if(eventHandlers.Length <= index)
+            Array.Resize(ref eventHandlers, TypeRegistry<ISingleton>.SoftCount);
 
-        handler.Handler = new TEventHandler();
+        if(eventHandlers[index] is not null)
+            return (IEventHandler<TEvent>)eventHandlers[index];
 
-        handler.Handler.Initialize(this);
+        TEventHandler eventHandler = new();
 
-        return handler.Handler;
+        eventHandler.Initialize(this);
+
+        eventHandlers[index] = eventHandler;
+
+        return eventHandler;
     }
 
     public void Emit<T>(Entity entity, ref T e) {

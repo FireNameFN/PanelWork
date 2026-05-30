@@ -10,7 +10,7 @@ public sealed class EntityManager {
 
     int next = 1;
 
-    IComponentMap[] maps = new IComponentMap[ComponentRegistry.SoftCount];
+    IComponentMap[] maps = new IComponentMap[TypeRegistry<IComponent>.SoftCount];
 
     public EntityManager() {
         for(int i = 1; i < ids.Length; i++)
@@ -114,7 +114,7 @@ public sealed class EntityManager {
     bool TryGetMap<T>(out ComponentMap<T> map) where T : class, IComponent {
         Unsafe.SkipInit(out map);
 
-        int index = ComponentRegistry.GetIndex<T>();
+        int index = TypeRegistry<IComponent>.GetIndex<T>();
 
         if(maps.Length <= index)
             return false;
@@ -128,10 +128,10 @@ public sealed class EntityManager {
     }
 
     ComponentMap<T> GetOrCreateMap<T>() where T : class, IComponent {
-        int index = ComponentRegistry.GetIndex<T>();
+        int index = TypeRegistry<IComponent>.GetIndex<T>();
 
         if(maps.Length <= index)
-            Array.Resize(ref maps, ComponentRegistry.SoftCount);
+            Array.Resize(ref maps, TypeRegistry<IComponent>.SoftCount);
 
         if(maps[index] is not null)
             return (ComponentMap<T>)maps[index];

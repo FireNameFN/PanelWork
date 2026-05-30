@@ -5,7 +5,7 @@ using PanelWork.Entities;
 namespace PanelWork.Panels;
 
 public sealed class ArchetypeBuilder(PanelManager panelManager) {
-    static readonly int ArchetypeIndex = ComponentRegistry.GetIndex<ArchetypeComponent>();
+    static readonly int ArchetypeIndex = TypeRegistry<IComponent>.GetIndex<ArchetypeComponent>();
 
     readonly PanelManager panelManager = panelManager;
 
@@ -14,7 +14,7 @@ public sealed class ArchetypeBuilder(PanelManager panelManager) {
     Entity eventEntity;
 
     public ArchetypeBuilder AddComponent<T>() where T : class, IComponent {
-        components.Add(ComponentRegistry.GetIndex<T>());
+        components.Add(TypeRegistry<IComponent>.GetIndex<T>());
 
         return this;
     }
