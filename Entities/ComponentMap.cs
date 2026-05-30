@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace PanelWork.Entities;
 
-public sealed class ComponentMap<T> where T : class {
+public sealed class ComponentMap<T> : IComponentMap where T : class {
     T[] components = [];
 
     public ref T GetOrAllocate(int index) {
@@ -21,5 +21,9 @@ public sealed class ComponentMap<T> where T : class {
             return null;
 
         return components[index];
+    }
+
+    public void Remove(int index) {
+        components[index] = null;
     }
 }

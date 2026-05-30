@@ -1,7 +1,6 @@
-using PanelWork.Facades;
 using PanelWork.Primitives;
 
-namespace PanelWork.Components;
+namespace PanelWork.Facades;
 
 public static class FacadePanelExtensions {
     extension(Panel panel) {

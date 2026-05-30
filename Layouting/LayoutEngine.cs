@@ -83,11 +83,11 @@ public sealed class LayoutEngine(App app) {
         int size = 0;
 
         for(int i = 0; i < layout.PanelCount; i++) {
-            int childIndex = index;
+            int subpanelIndex = index;
 
             UpdateMinSize(dir, ref index);
 
-            int min = dir.Min(ref units[childIndex]);
+            int min = dir.Min(ref units[subpanelIndex]);
 
             dir.SumOrMax(layout.Layout, min, ref size);
         }
@@ -118,16 +118,16 @@ public sealed class LayoutEngine(App app) {
         double stars = 0;
 
         for(int i = 0; i < layout.PanelCount; i++) {
-            int childIndex = index + i;
+            int subpanelIndex = index + i;
 
-            LayoutComponent childLayout = units[childIndex].Layout;
+            LayoutComponent subpanelLayout = units[subpanelIndex].Layout;
 
-            double star = dir.Star(childLayout);
+            double star = dir.Star(subpanelLayout);
 
             if(star <= 0)
                 continue;
 
-            available += dir.Min(ref units[childIndex]);
+            available += dir.Min(ref units[subpanelIndex]);
 
             stars += star;
         }
@@ -152,32 +152,32 @@ public sealed class LayoutEngine(App app) {
             stars = 0;
 
             for(int i = 0; i < layout.PanelCount; i++) {
-                int childIndex = index + i;
+                int subpanelIndex = index + i;
 
-                LayoutComponent childLayout = units[childIndex].Layout;
+                LayoutComponent subpanelLayout = units[subpanelIndex].Layout;
 
-                double star = dir.Star(childLayout);
+                double star = dir.Star(subpanelLayout);
 
                 if(star <= 0)
                     continue;
 
                 int size = (int)(star * pixelsPerStar);
 
-                int min = dir.Min(ref units[childIndex]);
+                int min = dir.Min(ref units[subpanelIndex]);
 
-                int max = dir.Max(childLayout);
+                int max = dir.Max(subpanelLayout);
 
                 if(size <= min || size >= max) {
                     size = PanelMath.Clamp(size, min, max);
 
                     passAvailable -= size;
 
-                    dir.LayoutSize(childLayout) = size;
+                    dir.LayoutSize(subpanelLayout) = size;
 
                     continue;
                 }
 
-                dir.LayoutSize(childLayout) = size;
+                dir.LayoutSize(subpanelLayout) = size;
 
                 stars += star;
             }
@@ -202,15 +202,15 @@ public sealed class LayoutEngine(App app) {
         int y = layout.LayoutBox.Y + layout.Padding.Top;
 
         for(int i = 0; i < layout.PanelCount; i++) {
-            LayoutComponent childLayout = units[index].Layout;
+            LayoutComponent subpanelLayout = units[index].Layout;
 
-            childLayout.LayoutBox.X = x;
-            childLayout.LayoutBox.Y = y;
+            subpanelLayout.LayoutBox.X = x;
+            subpanelLayout.LayoutBox.Y = y;
 
             if(layout.Layout != LayoutType.Vertical)
-                x += childLayout.LayoutBox.Width + layout.Gap;
+                x += subpanelLayout.LayoutBox.Width + layout.Gap;
             else
-                y += childLayout.LayoutBox.Height + layout.Gap;
+                y += subpanelLayout.LayoutBox.Height + layout.Gap;
 
             UpdatePos(ref index);
         }

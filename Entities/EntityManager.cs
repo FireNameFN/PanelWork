@@ -10,7 +10,7 @@ public sealed class EntityManager {
 
     int next = 1;
 
-    object[] maps = new object[ComponentRegistry.SoftCount];
+    IComponentMap[] maps = new IComponentMap[ComponentRegistry.SoftCount];
 
     public EntityManager() {
         for(int i = 1; i < ids.Length; i++)
@@ -97,6 +97,13 @@ public sealed class EntityManager {
             throw new InvalidOperationException("Entity does not have component.");
 
         return component;
+    }
+
+    public void RemoveComponents(Entity entity, ReadOnlySpan<int> components) {
+        ThrowIfDeleted(entity);
+
+        foreach(int component in components)
+            maps[component].Remove(entity.Id);
     }
 
     public void ThrowIfDeleted(Entity entity) {
