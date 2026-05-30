@@ -4,27 +4,27 @@ using PanelWork.Primitives;
 namespace PanelWork.Components;
 
 public sealed class LayoutComponent : IComponent {
-    public Entity[] Panels { get; set; }
+    public Entity[] Panels;
 
-    public int PanelCount { get; set; }
+    public int PanelCount;
 
-    public LayoutType Layout { get; set; }
+    public LayoutType Layout;
 
-    public int MinWidth { get; set; }
+    public int MinWidth;
 
-    public int MinHeight { get; set; }
+    public int MinHeight;
 
-    public int MaxWidth { get; set; }
+    public int MaxWidth;
 
-    public int MaxHeight { get; set; }
+    public int MaxHeight;
 
-    public double StarWidth { get; set; }
+    public double StarWidth;
 
-    public double StarHeight { get; set; }
+    public double StarHeight;
 
-    public Side Padding { get; set; }
+    public Side Padding;
 
-    public int Gap { get; set; }
+    public int Gap;
 
     public Box LayoutBox;
 }

@@ -7,6 +7,8 @@ namespace PanelWork.Panels;
 public sealed class PanelManager {
     public EntityManager EntityManager { get; } = new();
 
+    public GenericArchetypes Archetypes { get; }
+
     ISingleton[] eventHandlers = new ISingleton[TypeRegistry<ISingleton>.SoftCount];
 
     readonly ComponentLookup<ArchetypeComponent> archetypeLookup;
@@ -16,10 +18,16 @@ public sealed class PanelManager {
     public PanelManager() {
         archetypeLookup = EntityManager.GetLookup<ArchetypeComponent>();
         layoutLookup = EntityManager.GetLookup<LayoutComponent>();
+
+        Archetypes = new(this);
     }
 
-    public Panel CreatePanel() {
-        return new(this, EntityManager.CreateEntity());
+    public Panel CreatePanel(ArchetypeComponent archetype) {
+        Panel panel = new(this, EntityManager.CreateEntity());
+
+        archetypeLookup.Set(panel.Entity, archetype);
+
+        return panel;
     }
 
     public ArchetypeBuilder CreateArchetypeBuilder() {

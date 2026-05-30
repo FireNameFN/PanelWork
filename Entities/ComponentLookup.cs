@@ -21,4 +21,10 @@ public readonly struct ComponentLookup<T>(EntityManager entityManager, Component
 
         return component;
     }
+
+    public void Set(Entity entity, T component) {
+        entityManager.ThrowIfDeleted(entity);
+
+        componentMap.GetOrAllocate(entity.Id) = component;
+    }
 }

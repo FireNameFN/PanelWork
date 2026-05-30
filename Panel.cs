@@ -1,3 +1,4 @@
+using PanelWork.Components;
 using PanelWork.Entities;
 using PanelWork.Panels;
 
@@ -8,18 +9,12 @@ public readonly struct Panel(PanelManager panelManager, Entity entity) {
 
     public readonly Entity Entity = entity;
 
-    public Panel Fork() {
-        return PanelManager.CreatePanel();
+    public Panel Fork(ArchetypeComponent archetype) {
+        return PanelManager.CreatePanel(archetype);
     }
 
     public T Ensure<T>() where T : class, IComponent, new() {
         return PanelManager.EntityManager.EnsureComponent<T>(Entity);
-    }
-
-    public Panel Set<T>(T component) where T : class, IComponent {
-        PanelManager.EntityManager.SetComponent(Entity, component);
-
-        return this;
     }
 
     public void Emit<T>(ref T e) {
