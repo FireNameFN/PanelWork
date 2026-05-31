@@ -6,9 +6,9 @@ namespace PanelWork.Components;
 public sealed class ArchetypeComponent : IComponent {
     public Entity Event;
 
-    public IConstructor[] Constructors;
+    public IEntityAction[] Constructors;
 
-    public IConstructor[] Destructors;
+    public IEntityAction[] Destructors;
 
-    public (int Event, IEventHandler Handler)[] Events;
+    public IEntityAction[] Events;
 }

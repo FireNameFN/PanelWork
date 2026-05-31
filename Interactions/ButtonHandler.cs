@@ -22,7 +22,7 @@ public sealed class ButtonHandler : IEventHandler<InteractionEvent> {
         focusLookup = panelManager.EntityManager.GetLookup<FocusComponent>();
     }
 
-    public unsafe void Handle(Entity entity, ref InteractionEvent e) {
+    public void Handle(Entity entity, ref InteractionEvent e) {
         LayoutComponent layout = layoutLookup.Get(entity);
 
         FocusComponent focus = focusLookup.Get(entity);

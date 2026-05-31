@@ -8,11 +8,11 @@ namespace PanelWork.Panels;
 public sealed class ArchetypeBuilder(PanelManager panelManager) {
     readonly PanelManager panelManager = panelManager;
 
-    readonly List<IConstructor> constructors = [];
+    readonly List<IEntityAction> constructors = [];
 
-    readonly List<IConstructor> destructors = [];
+    readonly List<IEntityAction> destructors = [];
 
-    readonly List<(int Event, IEventHandler Handler)> events = [];
+    readonly List<IEntityAction> events = [];
 
     public ArchetypeBuilder Add(ArchetypeComponent component) {
         constructors.AddRange(component.Constructors);
@@ -31,11 +31,7 @@ public sealed class ArchetypeBuilder(PanelManager panelManager) {
     }
 
     public ArchetypeBuilder AddEvent<TEventHandler, TEvent>() where TEventHandler : IEventHandler<TEvent>, new() {
-        int index = panelManager.EntityManager.EnsureFactory<EventComponent<TEvent>>();
-
-        IEventHandler handler = panelManager.GetHandler<TEventHandler, TEvent>();
-
-        events.Add((index, handler));
+        events.Add(EventModifier<TEventHandler, TEvent>.Instance);
 
         return this;
     }
@@ -50,13 +46,10 @@ public sealed class ArchetypeBuilder(PanelManager panelManager) {
     public ArchetypeComponent Build() {
         Entity eventEntity = panelManager.EntityManager.CreateEntity();
 
-        (int Event, IEventHandler Handler)[] events = [..this.events.Distinct()];
+        IEntityAction[] events = [..this.events.Distinct()];
 
-        foreach((int e, IEventHandler handler) in events) {
-            IEventComponent comp = (IEventComponent)panelManager.EntityManager.EnsureComponent(eventEntity, e);
-
-            comp.Add(handler);
-        }
+        foreach(IEntityAction action in events)
+            action.Invoke(panelManager.EntityManager, panelManager, eventEntity);
 
         return new() {
             Event = eventEntity,

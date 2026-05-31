@@ -2,22 +2,18 @@ using PanelWork.Entities;
 
 namespace PanelWork.Panels;
 
-public interface IConstructor {
-    public void Add(EntityManager entityManager, Entity entity);
-}
-
-public sealed class Constructor<T> : IConstructor where T : class, IComponent, new() {
+public sealed class Constructor<T> : IEntityAction, IEventHandler where T : class, IComponent, new() {
     public static readonly Constructor<T> Instance = new();
 
-    public void Add(EntityManager entityManager, Entity entity) {
-        entityManager.SetComponent<T>(entity, new());
+    ComponentLookup<T> lookup;
+
+    public void Initialize(PanelManager panelManager) {
+        lookup = panelManager.EntityManager.GetLookup<T>();
     }
-}
 
-public sealed class Destructor<T> : IConstructor where T : class, IComponent {
-    public static readonly Destructor<T> Instance = new();
+    public void Invoke(EntityManager entityManager, PanelManager panelManager, Entity entity) {
+        entityManager.SetComponent<T>(entity, new());
 
-    public void Add(EntityManager entityManager, Entity entity) {
-        entityManager.SetComponent<T>(entity, null);
+        //lookup.Set(entity, new());
     }
 }

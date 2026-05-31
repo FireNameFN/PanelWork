@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using PanelWork.Components;
 using PanelWork.Entities;
 
@@ -23,12 +24,18 @@ public sealed class PanelManager {
     }
 
     public Panel CreatePanel(ArchetypeComponent archetype) {
+        long t1 = Stopwatch.GetTimestamp();
+
         Panel panel = new(this, EntityManager.CreateEntity());
 
         archetypeLookup.Set(panel.Entity, archetype);
 
-        foreach(IConstructor constructor in archetype.Constructors)
-            constructor.Add(EntityManager, panel.Entity);
+        foreach(IEntityAction constructor in archetype.Constructors)
+            constructor.Invoke(EntityManager, this, panel.Entity);
+
+        long t2 = Stopwatch.GetTimestamp();
+
+        Console.WriteLine((t2 - t1) * 1000000d / Stopwatch.Frequency);
 
         return panel;
     }
@@ -47,10 +54,28 @@ public sealed class PanelManager {
 
         archetypeLookup.Set(entity, null);
 
-        foreach(IConstructor constructor in archetype.Destructors)
-            constructor.Add(EntityManager, entity);
+        foreach(IEntityAction constructor in archetype.Destructors)
+            constructor.Invoke(EntityManager, this, entity);
 
         EntityManager.DeleteEntity(entity);
+    }
+
+    public IEntityAction GetConstructor<T>() where T : class, IComponent, new() {
+        int index = TypeRegistry<IEventHandler>.GetIndex<Constructor<T>>();
+
+        if(eventHandlers.Length <= index)
+            Array.Resize(ref eventHandlers, TypeRegistry<IEventHandler>.SoftCount);
+
+        if(eventHandlers[index] is not null)
+            return (IEntityAction)eventHandlers[index];
+
+        Constructor<T> eventHandler = new();
+
+        eventHandler.Initialize(this);
+
+        eventHandlers[index] = eventHandler;
+
+        return eventHandler;
     }
 
     public IEventHandler<TEvent> GetHandler<TEventHandler, TEvent>() where TEventHandler : IEventHandler<TEvent>, new() {
