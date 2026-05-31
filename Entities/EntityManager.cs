@@ -54,7 +54,7 @@ public sealed class EntityManager {
         return generations[entity.Id] != entity.Generation;
     }
 
-    public ComponentLookup<T> GetLookup<T>() where T : class, IComponent {
+    public ComponentLookup<T> GetLookup<T>() where T : class, IComponent, new() {
         return new(this, GetOrCreateMap<T>());
     }
 
@@ -97,6 +97,34 @@ public sealed class EntityManager {
             throw new InvalidOperationException("Entity does not have component.");
 
         return component;
+    }
+
+    public int EnsureFactory<T>() where T : class, IComponent, new() {
+        int index = ComponentFactory.Register<T>();
+
+        if(maps.Length <= index)
+            Array.Resize(ref maps, TypeRegistry<IComponent>.SoftCount);
+
+        maps[index] ??= new ComponentMap<T>();
+
+        return index;
+    }
+
+    public IComponent EnsureComponent(Entity entity, int component) {
+        ThrowIfDeleted(entity);
+
+        IComponent comp = ComponentFactory.Create(component);
+
+        maps[component].Set(entity.Id, comp);
+
+        return comp;
+    }
+
+    public void CreateComponents(Entity entity, ReadOnlySpan<int> components) {
+        ThrowIfDeleted(entity);
+
+        foreach(int component in components)
+            maps[component].Set(entity.Id, ComponentFactory.Create(component));
     }
 
     public void RemoveComponents(Entity entity, ReadOnlySpan<int> components) {

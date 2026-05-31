@@ -1,8 +1,10 @@
 using System;
 using System.Diagnostics;
+using Microsoft.VisualBasic;
 using PanelWork.Components;
 using PanelWork.Entities;
 using PanelWork.Facades;
+using PanelWork.Interactions;
 using SDL;
 using Thermal.Core;
 using Thermal.Extensions;
@@ -150,6 +152,8 @@ public sealed unsafe class Window {
             return;
         }
 
+        UpdateInteraction(Panel);
+
         app.layoutEngine.Update(Panel, presenter.Width, presenter.Height);
 
         UpdateDraw(index);
@@ -158,6 +162,25 @@ public sealed unsafe class Window {
     long time = 0;
 
     int frames = 0;
+
+    void UpdateInteraction(Entity entity) {
+        LayoutComponent layout = layoutLookup.Get(entity);
+
+        float x;
+        float y;
+
+        SDL_GetMouseState(&x, &y);
+
+        InteractionEvent e = new() {
+            MouseX = (int)x,
+            MouseY = (int)y
+        };
+
+        app.PanelManager.Emit(entity, ref e);
+
+        for(int i = 0; i < layout.PanelCount; i++)
+            UpdateInteraction(layout.Panels[i]);
+    }
 
     void UpdateDraw(uint index) {
         app.device.Handle.vkBeginCommandBuffer(commandBuffer.Handle, VkCommandBufferUsageFlags.OneTimeSubmit);

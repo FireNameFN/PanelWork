@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using PanelWork.Components;
 using PanelWork.Entities;
 
@@ -11,21 +13,30 @@ public sealed class ArchetypeBuilder(PanelManager panelManager) {
 
     readonly List<int> components = [];
 
-    Entity eventEntity;
+    readonly List<(int Event, IEventHandler Handler)> events = [];
 
-    public ArchetypeBuilder AddComponent<T>() where T : class, IComponent {
-        components.Add(TypeRegistry<IComponent>.GetIndex<T>());
+    public ArchetypeBuilder Add(ArchetypeComponent component) {
+        components.AddRange(component.Components.AsSpan(1));
+
+        events.AddRange(component.Events);
+
+        return this;
+    }
+
+    public ArchetypeBuilder AddComponent<T>() where T : class, IComponent, new() {
+        int index = panelManager.EntityManager.EnsureFactory<T>();
+
+        components.Add(index);
 
         return this;
     }
 
     public ArchetypeBuilder AddEvent<TEventHandler, TEvent>() where TEventHandler : IEventHandler<TEvent>, new() {
-        if(!eventEntity.IsValid)
-            eventEntity = panelManager.EntityManager.CreateEntity();
+        int index = panelManager.EntityManager.EnsureFactory<EventComponent<TEvent>>();
 
-        EventComponent<TEvent> eventComponent = panelManager.EntityManager.EnsureComponent<EventComponent<TEvent>>(eventEntity);
+        IEventHandler handler = panelManager.GetHandler<TEventHandler, TEvent>();
 
-        eventComponent.Handlers.Add(panelManager.GetHandler<TEventHandler, TEvent>());
+        events.Add((index, handler));
 
         return this;
     }
@@ -33,13 +44,24 @@ public sealed class ArchetypeBuilder(PanelManager panelManager) {
     public void Clear() {
         components.Clear();
 
-        eventEntity = default;
+        events.Clear();
     }
 
     public ArchetypeComponent Build() {
+        Entity eventEntity = panelManager.EntityManager.CreateEntity();
+
+        (int Event, IEventHandler Handler)[] events = [..this.events.Distinct()];
+
+        foreach((int e, IEventHandler handler) in events) {
+            IEventComponent comp = (IEventComponent)panelManager.EntityManager.EnsureComponent(eventEntity, e);
+
+            comp.Add(handler);
+        }
+
         return new() {
             Event = eventEntity,
-            Components = [ArchetypeIndex, ..components]
+            Components = [ArchetypeIndex, ..components.Distinct()],
+            Events = events
         };
     }
 }

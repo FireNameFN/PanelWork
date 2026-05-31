@@ -13,8 +13,8 @@ public readonly struct Panel(PanelManager panelManager, Entity entity) {
         return PanelManager.CreatePanel(archetype);
     }
 
-    public T Ensure<T>() where T : class, IComponent, new() {
-        return PanelManager.EntityManager.EnsureComponent<T>(Entity);
+    public T Get<T>() where T : class, IComponent, new() {
+        return PanelManager.EntityManager.GetComponent<T>(Entity);
     }
 
     public void Emit<T>(ref T e) {

@@ -9,7 +9,7 @@ public sealed class PanelManager {
 
     public GenericArchetypes Archetypes { get; }
 
-    ISingleton[] eventHandlers = new ISingleton[TypeRegistry<ISingleton>.SoftCount];
+    IEventHandler[] eventHandlers = new IEventHandler[TypeRegistry<IEventHandler>.SoftCount];
 
     readonly ComponentLookup<ArchetypeComponent> archetypeLookup;
 
@@ -26,6 +26,8 @@ public sealed class PanelManager {
         Panel panel = new(this, EntityManager.CreateEntity());
 
         archetypeLookup.Set(panel.Entity, archetype);
+
+        EntityManager.CreateComponents(panel.Entity, archetype.Components.AsSpan(1));
 
         return panel;
     }
@@ -48,10 +50,10 @@ public sealed class PanelManager {
     }
 
     public IEventHandler<TEvent> GetHandler<TEventHandler, TEvent>() where TEventHandler : IEventHandler<TEvent>, new() {
-        int index = TypeRegistry<ISingleton>.GetIndex<TEventHandler>();
+        int index = TypeRegistry<IEventHandler>.GetIndex<TEventHandler>();
 
         if(eventHandlers.Length <= index)
-            Array.Resize(ref eventHandlers, TypeRegistry<ISingleton>.SoftCount);
+            Array.Resize(ref eventHandlers, TypeRegistry<IEventHandler>.SoftCount);
 
         if(eventHandlers[index] is not null)
             return (IEventHandler<TEvent>)eventHandlers[index];

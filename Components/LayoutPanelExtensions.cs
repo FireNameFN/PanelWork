@@ -7,7 +7,7 @@ namespace PanelWork.Components;
 public static class LayoutPanelExtensions {
     extension(Panel panel) {
         public Panel Min(int width, int height) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.MinWidth = width;
             layout.MinHeight = height;
@@ -16,7 +16,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel MinWidth(int width) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.MinWidth = width;
 
@@ -24,7 +24,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel MinHeight(int height) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.MinHeight = height;
 
@@ -32,7 +32,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel Max(int width, int height) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.MaxWidth = width;
             layout.MaxHeight = height;
@@ -41,7 +41,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel MaxWidth(int width) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.MaxWidth = width;
 
@@ -49,7 +49,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel MaxHeight(int height) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.MaxHeight = height;
 
@@ -57,7 +57,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel Star(double width, double height) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.StarWidth = width;
             layout.StarHeight = height;
@@ -66,7 +66,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel StarWidth(double star) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.StarWidth = star;
 
@@ -74,7 +74,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel StarHeight(double star) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.StarHeight = star;
 
@@ -82,7 +82,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel GrowWidth() {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.MaxWidth = int.MaxValue;
             layout.StarWidth = 1;
@@ -91,7 +91,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel GrowHeight() {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.MaxHeight = int.MaxValue;
             layout.StarHeight = 1;
@@ -100,7 +100,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel Padding(Side padding) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.Padding = padding;
 
@@ -108,7 +108,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel Gap(int gap) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.Gap = gap;
 
@@ -116,7 +116,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel Panels(params ReadOnlySpan<Panel> panels) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             if(layout.Panels is null || layout.Panels.Length < panels.Length)
                 layout.Panels = new Entity[panels.Length];
@@ -130,7 +130,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel AddPanel(Panel subpanel) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             layout.Panels ??= new Entity[4];
 
@@ -148,7 +148,7 @@ public static class LayoutPanelExtensions {
         }
 
         public Panel RemovePanel(int index) {
-            LayoutComponent layout = panel.Ensure();
+            LayoutComponent layout = panel.Get();
 
             int nextIndex = index + 1;
 
@@ -159,8 +159,8 @@ public static class LayoutPanelExtensions {
             return panel;
         }
 
-        LayoutComponent Ensure() {
-            return panel.Ensure<LayoutComponent>();
+        LayoutComponent Get() {
+            return panel.Get<LayoutComponent>();
         }
     }
 }

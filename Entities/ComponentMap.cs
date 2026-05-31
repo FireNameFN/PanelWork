@@ -23,6 +23,10 @@ public sealed class ComponentMap<T> : IComponentMap where T : class {
         return components[index];
     }
 
+    public void Set(int index, IComponent component) {
+        GetOrAllocate(index) = (T)component;
+    }
+
     public void Remove(int index) {
         components[index] = null;
     }
