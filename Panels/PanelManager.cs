@@ -68,9 +68,13 @@ public sealed class PanelManager {
     public void Emit<T>(Entity entity, ref T e) {
         ArchetypeComponent archetype = archetypeLookup.Get(entity);
 
-        EventComponent<T> eventHandler = EntityManager.GetComponent<EventComponent<T>>(archetype.Event);
+        if(EntityManager.Deleted(archetype.Event))
+            return;
 
-        foreach(IEventHandler<T> handler in eventHandler.Handlers)
+        if(!EntityManager.TryGetComponent(archetype.Event, out EventComponent<T> eventComponent))
+            return;
+
+        foreach(IEventHandler<T> handler in eventComponent.Handlers)
             handler.Handle(entity, ref e);
     }
 }
