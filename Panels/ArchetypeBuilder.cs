@@ -5,14 +5,16 @@ using PanelWork.Entities;
 
 namespace PanelWork.Panels;
 
-public sealed class ArchetypeBuilder(PanelManager panelManager) {
-    readonly PanelManager panelManager = panelManager;
-
+public sealed class ArchetypeBuilder {
     readonly List<IEntityAction> constructors = [];
 
     readonly List<IEntityAction> destructors = [];
 
     readonly List<IEntityAction> events = [];
+
+    public static ArchetypeBuilder Create() {
+        return new();
+    }
 
     public ArchetypeBuilder Add(ArchetypeComponent component) {
         constructors.AddRange(component.Constructors);
@@ -43,13 +45,13 @@ public sealed class ArchetypeBuilder(PanelManager panelManager) {
         events.Clear();
     }
 
-    public ArchetypeComponent Build() {
+    public ArchetypeComponent Build(PanelManager panelManager) {
         Entity eventEntity = panelManager.EntityManager.CreateEntity();
 
         IEntityAction[] events = [..this.events.Distinct()];
 
         foreach(IEntityAction action in events)
-            action.Invoke(panelManager.EntityManager, panelManager, eventEntity);
+            action.Invoke(panelManager.EntityManager, eventEntity);
 
         return new() {
             Event = eventEntity,

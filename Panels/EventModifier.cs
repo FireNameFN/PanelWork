@@ -6,9 +6,11 @@ namespace PanelWork.Panels;
 public sealed class EventModifier<TEventHandler, TEvent> : IEntityAction where TEventHandler : IEventHandler<TEvent>, new() {
     public static readonly EventModifier<TEventHandler, TEvent> Instance = new();
 
-    public void Invoke(EntityManager entityManager, PanelManager panelManager, Entity entity) {
+    static readonly TEventHandler handler = new();
+
+    public void Invoke(EntityManager entityManager, Entity entity) {
         EventComponent<TEvent> component = entityManager.EnsureComponent<EventComponent<TEvent>>(entity);
 
-        component.Handlers.Add(panelManager.GetHandler<TEventHandler, TEvent>());
+        component.Handlers.Add(handler);
     }
 }

@@ -20,4 +20,10 @@ public readonly struct Panel(PanelManager panelManager, Entity entity) {
     public void Emit<T>(ref T e) {
         PanelManager.Emit(Entity, ref e);
     }
+
+    public void EmitEmpty<T>() {
+        T e = default;
+
+        PanelManager.Emit(Entity, ref e);
+    }
 }

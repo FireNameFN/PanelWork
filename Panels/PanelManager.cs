@@ -10,8 +10,6 @@ public sealed class PanelManager {
 
     public GenericArchetypes Archetypes { get; }
 
-    IEventHandler[] eventHandlers = new IEventHandler[TypeRegistry<IEventHandler>.SoftCount];
-
     readonly ComponentLookup<ArchetypeComponent> archetypeLookup;
 
     readonly ComponentLookup<LayoutComponent> layoutLookup;
@@ -31,17 +29,13 @@ public sealed class PanelManager {
         archetypeLookup.Set(panel.Entity, archetype);
 
         foreach(IEntityAction constructor in archetype.Constructors)
-            constructor.Invoke(EntityManager, this, panel.Entity);
+            constructor.Invoke(EntityManager, panel.Entity);
 
         long t2 = Stopwatch.GetTimestamp();
 
         Console.WriteLine((t2 - t1) * 1000000d / Stopwatch.Frequency);
 
         return panel;
-    }
-
-    public ArchetypeBuilder CreateArchetypeBuilder() {
-        return new(this);
     }
 
     public void DeletePanel(Entity entity) {
@@ -55,45 +49,9 @@ public sealed class PanelManager {
         archetypeLookup.Set(entity, null);
 
         foreach(IEntityAction constructor in archetype.Destructors)
-            constructor.Invoke(EntityManager, this, entity);
+            constructor.Invoke(EntityManager, entity);
 
         EntityManager.DeleteEntity(entity);
-    }
-
-    public IEntityAction GetConstructor<T>() where T : class, IComponent, new() {
-        int index = TypeRegistry<IEventHandler>.GetIndex<Constructor<T>>();
-
-        if(eventHandlers.Length <= index)
-            Array.Resize(ref eventHandlers, TypeRegistry<IEventHandler>.SoftCount);
-
-        if(eventHandlers[index] is not null)
-            return (IEntityAction)eventHandlers[index];
-
-        Constructor<T> eventHandler = new();
-
-        eventHandler.Initialize(this);
-
-        eventHandlers[index] = eventHandler;
-
-        return eventHandler;
-    }
-
-    public IEventHandler<TEvent> GetHandler<TEventHandler, TEvent>() where TEventHandler : IEventHandler<TEvent>, new() {
-        int index = TypeRegistry<IEventHandler>.GetIndex<TEventHandler>();
-
-        if(eventHandlers.Length <= index)
-            Array.Resize(ref eventHandlers, TypeRegistry<IEventHandler>.SoftCount);
-
-        if(eventHandlers[index] is not null)
-            return (IEventHandler<TEvent>)eventHandlers[index];
-
-        TEventHandler eventHandler = new();
-
-        eventHandler.Initialize(this);
-
-        eventHandlers[index] = eventHandler;
-
-        return eventHandler;
     }
 
     public void Emit<T>(Entity entity, ref T e) {
@@ -106,6 +64,6 @@ public sealed class PanelManager {
             return;
 
         foreach(IEventHandler<T> handler in eventComponent.Handlers)
-            handler.Handle(entity, ref e);
+            handler.Handle(new(this, entity), ref e);
     }
 }

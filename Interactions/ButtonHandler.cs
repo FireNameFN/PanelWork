@@ -1,39 +1,21 @@
-using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using PanelWork.Components;
-using PanelWork.Entities;
 using PanelWork.Panels;
 
 namespace PanelWork.Interactions;
 
 public sealed class ButtonHandler : IEventHandler<InteractionEvent> {
-    PanelManager panelManager;
+    public void Handle(Panel panel, ref InteractionEvent e) {
+        LayoutComponent layout = panel.Get<LayoutComponent>();
 
-    ComponentLookup<LayoutComponent> layoutLookup;
-
-    ComponentLookup<FocusComponent> focusLookup;
-
-    public void Initialize(PanelManager panelManager) {
-        this.panelManager = panelManager;
-
-        layoutLookup = panelManager.EntityManager.GetLookup<LayoutComponent>();
-
-        focusLookup = panelManager.EntityManager.GetLookup<FocusComponent>();
-    }
-
-    public void Handle(Entity entity, ref InteractionEvent e) {
-        LayoutComponent layout = layoutLookup.Get(entity);
-
-        FocusComponent focus = focusLookup.Get(entity);
+        FocusComponent focus = panel.Get<FocusComponent>();
 
         bool hovered = layout.LayoutBox.Contains(e.MouseX, e.MouseY);
 
         if(focus.Hovered != hovered) {
             if(hovered)
-                panelManager.Emit(entity, ref Unsafe.NullRef<MouseEnteredEvent>());
+                panel.EmitEmpty<MouseEnteredEvent>();
             else
-                panelManager.Emit(entity, ref Unsafe.NullRef<MouseLeavedEvent>());
+                panel.EmitEmpty<MouseLeavedEvent>();
 
             focus.Hovered = hovered;
         }
