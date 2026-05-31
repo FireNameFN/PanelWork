@@ -27,7 +27,8 @@ public sealed class PanelManager {
 
         archetypeLookup.Set(panel.Entity, archetype);
 
-        EntityManager.CreateComponents(panel.Entity, archetype.Components.AsSpan(1));
+        foreach(IConstructor constructor in archetype.Constructors)
+            constructor.Add(EntityManager, panel.Entity);
 
         return panel;
     }
@@ -44,7 +45,10 @@ public sealed class PanelManager {
 
         ArchetypeComponent archetype = archetypeLookup.Get(entity);
 
-        EntityManager.RemoveComponents(entity, archetype.Components);
+        archetypeLookup.Set(entity, null);
+
+        foreach(IConstructor constructor in archetype.Destructors)
+            constructor.Add(EntityManager, entity);
 
         EntityManager.DeleteEntity(entity);
     }

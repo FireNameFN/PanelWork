@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using PanelWork.Components;
@@ -7,16 +6,17 @@ using PanelWork.Entities;
 namespace PanelWork.Panels;
 
 public sealed class ArchetypeBuilder(PanelManager panelManager) {
-    static readonly int ArchetypeIndex = TypeRegistry<IComponent>.GetIndex<ArchetypeComponent>();
-
     readonly PanelManager panelManager = panelManager;
 
-    readonly List<int> components = [];
+    readonly List<IConstructor> constructors = [];
+
+    readonly List<IConstructor> destructors = [];
 
     readonly List<(int Event, IEventHandler Handler)> events = [];
 
     public ArchetypeBuilder Add(ArchetypeComponent component) {
-        components.AddRange(component.Components.AsSpan(1));
+        constructors.AddRange(component.Constructors);
+        destructors.AddRange(component.Destructors);
 
         events.AddRange(component.Events);
 
@@ -24,9 +24,8 @@ public sealed class ArchetypeBuilder(PanelManager panelManager) {
     }
 
     public ArchetypeBuilder AddComponent<T>() where T : class, IComponent, new() {
-        int index = panelManager.EntityManager.EnsureFactory<T>();
-
-        components.Add(index);
+        constructors.Add(Constructor<T>.Instance);
+        destructors.Add(Destructor<T>.Instance);
 
         return this;
     }
@@ -42,7 +41,8 @@ public sealed class ArchetypeBuilder(PanelManager panelManager) {
     }
 
     public void Clear() {
-        components.Clear();
+        constructors.Clear();
+        destructors.Clear();
 
         events.Clear();
     }
@@ -60,7 +60,8 @@ public sealed class ArchetypeBuilder(PanelManager panelManager) {
 
         return new() {
             Event = eventEntity,
-            Components = [ArchetypeIndex, ..components.Distinct()],
+            Constructors = [..constructors.Distinct()],
+            Destructors = [..destructors.Distinct()],
             Events = events
         };
     }
