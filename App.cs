@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.Marshalling;
+using System.Threading;
+using System.Threading.Tasks;
 using PanelWork.Layouting;
 using PanelWork.Panels;
 using SDL;
@@ -103,6 +105,10 @@ public sealed class App : IDisposable {
     }
 
     public unsafe void Run() {
+        PanelSynchronizationContext context = new();
+
+        SynchronizationContext.SetSynchronizationContext(context);
+
         while(true) {
             SDL_Event e;
 
@@ -120,6 +126,8 @@ public sealed class App : IDisposable {
                     return;
             } while(SDL_PollEvent(&e));
 
+            context.Update();
+
             foreach(Window window in windows)
                 window.Update();
         }
@@ -127,6 +135,12 @@ public sealed class App : IDisposable {
 
     public void Dispose() {
         SDL_Quit();
+    }
+
+    public static void Run(Task task) {
+        PanelSynchronizationContext context = (PanelSynchronizationContext)SynchronizationContext.Current;
+
+        context.Run(task);
     }
 
     static unsafe bool IsPresentationSupported(ThPhysicalDevice physicalDevice, uint queueFamily, VkQueueFlags flags) {

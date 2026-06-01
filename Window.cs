@@ -169,11 +169,12 @@ public sealed unsafe class Window {
         float x;
         float y;
 
-        SDL_GetMouseState(&x, &y);
+        SDL_MouseButtonFlags flags = SDL_GetMouseState(&x, &y);
 
         InteractionEvent e = new() {
             MouseX = (int)x,
-            MouseY = (int)y
+            MouseY = (int)y,
+            MouseDown = (flags & SDL_MouseButtonFlags.SDL_BUTTON_LMASK) != 0
         };
 
         app.PanelManager.Emit(entity, ref e);

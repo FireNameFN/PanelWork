@@ -1,16 +1,33 @@
 using PanelWork.Components;
 using PanelWork.Facades;
+using PanelWork.Interactions;
 
 namespace PanelWork.Panels;
 
-public sealed class GenericArchetypes(PanelManager panelManager) {
-    public readonly ArchetypeComponent Empty = ArchetypeBuilder.Create()
-        .AddComponent<LayoutComponent>()
-        .Build(panelManager);
+public sealed class GenericArchetypes {
+    public readonly ArchetypeComponent Empty;
 
-    public readonly ArchetypeComponent Rect = ArchetypeBuilder.Create()
-        .AddComponent<LayoutComponent>()
-        .AddComponent<RectFacadeComponent>()
-        .AddEvent<RectFacadeHandler, DrawEvent>()
-        .Build(panelManager);
+    public readonly ArchetypeComponent Rect;
+
+    public readonly ArchetypeComponent Button;
+
+    public GenericArchetypes(PanelManager panelManager) {
+        ArchetypeBuilder builder = ArchetypeBuilder.Create();
+
+        Empty = builder
+            .AddComponent<LayoutComponent>()
+            .Build(panelManager);
+
+        Rect = builder
+            .AddComponent<RectFacadeComponent>()
+            .AddEvent<RectFacadeHandler, DrawEvent>()
+            .Build(panelManager);
+
+        Button = builder
+            .AddComponent<FocusComponent>()
+            .AddComponent<ButtonComponent>()
+            .AddEvent<FocusHandler, InteractionEvent>()
+            .AddEvent<ButtonHandler, MousePressedEvent>()
+            .Build(panelManager);
+    }
 }
