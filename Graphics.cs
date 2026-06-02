@@ -1,4 +1,5 @@
 using System.Numerics;
+using PanelWork.Primitives;
 using Thermal.Core;
 using Thermal.Meshes;
 using Thermal.Primitives;
@@ -30,9 +31,9 @@ public sealed class Graphics {
         currentPipeline = null;
     }
 
-    public void DrawRect(int x, int y, int width, int height, Vector4 color) {
+    public void DrawRect(Box box, Vector4 color) {
         UsePipeline(pipeline);
 
-        drawHandle.AddDraw(Rect.Create(x, y, x + width, y + height, color));
+        drawHandle.AddDraw(Rect.Create(box.X, box.Y, box.X2, box.Y2, color));
     }
 }

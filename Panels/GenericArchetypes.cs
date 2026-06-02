@@ -9,7 +9,7 @@ public sealed class GenericArchetypes {
 
     public readonly ArchetypeComponent Rect;
 
-    public readonly ArchetypeComponent Button;
+    public readonly ArchetypeComponent Focus;
 
     public GenericArchetypes(PanelManager panelManager) {
         ArchetypeBuilder builder = ArchetypeBuilder.Create();
@@ -23,11 +23,9 @@ public sealed class GenericArchetypes {
             .AddEvent<RectFacadeHandler, DrawEvent>()
             .Build(panelManager);
 
-        Button = builder
+        Focus = builder
             .AddComponent<FocusComponent>()
-            .AddComponent<ButtonComponent>()
             .AddEvent<FocusHandler, InteractionEvent>()
-            .AddEvent<ButtonHandler, MousePressedEvent>()
             .Build(panelManager);
     }
 }

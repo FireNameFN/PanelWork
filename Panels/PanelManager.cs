@@ -57,7 +57,7 @@ public sealed class PanelManager {
     public void Emit<T>(Entity entity, ref T e) {
         ArchetypeComponent archetype = archetypeLookup.Get(entity);
 
-        if(EntityManager.Deleted(archetype.Event))
+        if(!archetype.Event.IsValid)
             return;
 
         if(!EntityManager.TryGetComponent(archetype.Event, out EventComponent<T> eventComponent))

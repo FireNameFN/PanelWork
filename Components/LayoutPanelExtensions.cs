@@ -6,6 +6,14 @@ namespace PanelWork.Components;
 
 public static class LayoutPanelExtensions {
     extension(Panel panel) {
+        public Panel Layout(LayoutType type) {
+            LayoutComponent layout = panel.Get();
+
+            layout.Layout = type;
+
+            return panel;
+        }
+        
         public Panel Min(int width, int height) {
             LayoutComponent layout = panel.Get();
 
@@ -81,20 +89,20 @@ public static class LayoutPanelExtensions {
             return panel;
         }
 
-        public Panel GrowWidth() {
+        public Panel GrowWidth(double star = 1) {
             LayoutComponent layout = panel.Get();
 
             layout.MaxWidth = int.MaxValue;
-            layout.StarWidth = 1;
+            layout.StarWidth = star;
 
             return panel;
         }
 
-        public Panel GrowHeight() {
+        public Panel GrowHeight(double star = 1) {
             LayoutComponent layout = panel.Get();
 
             layout.MaxHeight = int.MaxValue;
-            layout.StarHeight = 1;
+            layout.StarHeight = star;
 
             return panel;
         }

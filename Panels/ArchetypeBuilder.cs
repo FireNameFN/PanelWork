@@ -46,12 +46,16 @@ public sealed class ArchetypeBuilder {
     }
 
     public ArchetypeComponent Build(PanelManager panelManager) {
-        Entity eventEntity = panelManager.EntityManager.CreateEntity();
+        Entity eventEntity = default;
 
         IEntityAction[] events = [..this.events.Distinct()];
 
-        foreach(IEntityAction action in events)
-            action.Invoke(panelManager.EntityManager, eventEntity);
+        if(events.Length > 0) {
+            eventEntity = panelManager.EntityManager.CreateEntity();
+
+            foreach(IEntityAction action in events)
+                action.Invoke(panelManager.EntityManager, eventEntity);
+        }
 
         return new() {
             Event = eventEntity,

@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,7 +9,7 @@ namespace PanelWork;
 public sealed class PanelSynchronizationContext : SynchronizationContext {
     readonly Action<Task> onFaulted;
 
-    readonly Queue<(SendOrPostCallback Callback, object State)> callbacks = [];
+    readonly ConcurrentQueue<CallbackState> callbacks = [];
 
     Exception exception;
 
@@ -18,7 +18,7 @@ public sealed class PanelSynchronizationContext : SynchronizationContext {
     }
 
     public override void Post(SendOrPostCallback callback, object state) {
-        callbacks.Enqueue((callback, state));
+        callbacks.Enqueue(new(callback, state));
     }
 
     public void Run(Task task) {
@@ -26,11 +26,8 @@ public sealed class PanelSynchronizationContext : SynchronizationContext {
     }
 
     public void Update() {
-        while(callbacks.TryDequeue(out (SendOrPostCallback Callback, object State) callback)) {
+        while(callbacks.TryDequeue(out CallbackState callback))
             callback.Callback(callback.State);
-
-            Console.WriteLine("ctx");
-        }
 
         if(exception is not null)
             ExceptionDispatchInfo.Throw(exception);
@@ -38,5 +35,11 @@ public sealed class PanelSynchronizationContext : SynchronizationContext {
 
     void OnFaulted(Task task) {
         exception ??= task.Exception.GetBaseException();
+    }
+
+    readonly struct CallbackState(SendOrPostCallback callback, object state) {
+        public readonly SendOrPostCallback Callback = callback;
+
+        public readonly object State = state;
     }
 }

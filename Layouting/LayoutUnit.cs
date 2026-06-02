@@ -5,11 +5,13 @@ namespace PanelWork.Layouting;
 public struct LayoutUnit {
     public LayoutComponent Layout;
 
+    public int NextIndex;
+
     public int MinWidth;
 
     public int MinHeight;
 
-    public int AvailableWidth;
+    public int RequiredWidth;
 
-    public int AvailableHeight;
+    public int RequiredHeight;
 }

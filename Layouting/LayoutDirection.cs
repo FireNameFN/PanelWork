@@ -11,7 +11,7 @@ public readonly struct LayoutDirection {
 
     public bool IsHorizontal { get; }
 
-    public bool IsVertical => IsHorizontal;
+    public bool IsVertical => !IsHorizontal;
 
     private LayoutDirection(bool horizontal) {
         IsHorizontal = horizontal;
@@ -35,11 +35,11 @@ public readonly struct LayoutDirection {
         return ref unit.MinHeight;
     }
 
-    public ref int Available(ref LayoutUnit unit) {
+    public ref int Required(ref LayoutUnit unit) {
         if(IsHorizontal)
-            return ref unit.AvailableWidth;
+            return ref unit.RequiredWidth;
 
-        return ref unit.AvailableHeight;
+        return ref unit.RequiredHeight;
     }
 
     public int Min(LayoutComponent layout) {

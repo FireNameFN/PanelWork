@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 
 namespace PanelWork.Interactions;
 
-public static class ButtonPanelExtensions {
+public static class ActionPanelExtensions {
     extension(Panel panel) {
-        public Panel Action(Func<Task> action) {
-            ButtonComponent button = panel.Get<ButtonComponent>();
+        public Panel Action<T>(Func<T, Task> action) {
+            ActionComponent<T> button = panel.Get<ActionComponent<T>>();
 
             button.Action = action;
 

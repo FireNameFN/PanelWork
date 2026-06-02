@@ -15,6 +15,8 @@ public sealed class EntityManager {
     public EntityManager() {
         for(int i = 1; i < ids.Length; i++)
             ids[i] = i + 1;
+
+        generations[0] = -1;
     }
 
     public Entity CreateEntity() {

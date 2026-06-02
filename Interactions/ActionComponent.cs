@@ -4,6 +4,6 @@ using PanelWork.Entities;
 
 namespace PanelWork.Interactions;
 
-public sealed class ButtonComponent : IComponent {
-    public Func<Task> Action;
+public sealed class ActionComponent<T> : IComponent {
+    public Func<T, Task> Action;
 }

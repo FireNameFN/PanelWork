@@ -13,6 +13,14 @@ public readonly struct Panel(PanelManager panelManager, Entity entity) {
         return PanelManager.CreatePanel(archetype);
     }
 
+    public Panel ForkEmpty() {
+        return PanelManager.CreatePanel(PanelManager.Archetypes.Empty);
+    }
+
+    public Panel ForkRect() {
+        return PanelManager.CreatePanel(PanelManager.Archetypes.Rect);
+    }
+
     public T Get<T>() where T : class, IComponent, new() {
         return PanelManager.EntityManager.GetComponent<T>(Entity);
     }

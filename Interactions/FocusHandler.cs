@@ -9,27 +9,41 @@ public sealed class FocusHandler : IEventHandler<InteractionEvent> {
 
         FocusComponent focus = panel.Get<FocusComponent>();
 
+        FocusEvent focusEvent = new();
+
+        bool emit = false;
+
         bool hovered = layout.LayoutBox.Contains(e.MouseX, e.MouseY);
 
         if(focus.Hovered != hovered) {
             focus.Hovered = hovered;
 
+            emit = true;
+
             if(hovered)
-                panel.EmitEmpty<MouseEnteredEvent>();
+                focusEvent.Entered = true;
             else
-                panel.EmitEmpty<MouseLeavedEvent>();
+                focusEvent.Leaved = true;
         }
 
         bool pressed = e.MouseDown && (hovered || focus.Pressed);
 
-        if(focus.Pressed == pressed)
-            return;
+        if(focus.Pressed != pressed) {
+            focus.Pressed = pressed;
 
-        focus.Pressed = pressed;
+            emit = true;
 
-        if(pressed)
-            panel.EmitEmpty<MousePressedEvent>();
-        else
-            panel.EmitEmpty<MouseReleasedEvent>();
+            if(pressed)
+                focusEvent.Pressed = true;
+            else
+                focusEvent.Released = true;
+        }
+
+        if(emit) {
+            panel.Emit(ref focusEvent);
+
+            if(focusEvent.Released && hovered)
+                panel.EmitEmpty<ClickedEvent>();
+        }
     }
 }

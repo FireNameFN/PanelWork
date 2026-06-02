@@ -34,13 +34,9 @@ public sealed class LayoutEngine(App app) {
         layout.LayoutBox.Width = PanelMath.Clamp(width, units[0].MinWidth, layout.MaxWidth);
         layout.LayoutBox.Height = PanelMath.Clamp(height, units[0].MinHeight, layout.MaxHeight);
 
-        index = 0;
+        UpdateSize(LayoutDirection.Horizontal, 0);
 
-        UpdateSize(LayoutDirection.Horizontal, ref index);
-
-        index = 0;
-
-        UpdateSize(LayoutDirection.Vertical, ref index);
+        UpdateSize(LayoutDirection.Vertical, 0);
 
         layout.LayoutBox.X = 0;
         layout.LayoutBox.Y = 0;
@@ -73,6 +69,7 @@ public sealed class LayoutEngine(App app) {
             Array.Resize(ref units, units.Length * 2);
 
         units[entityIndex].Layout = layout;
+        units[entityIndex].NextIndex = index;
     }
 
     void UpdateMinSize(LayoutDirection dir, ref int index) {
@@ -92,42 +89,54 @@ public sealed class LayoutEngine(App app) {
             dir.SumOrMax(layout.Layout, min, ref size);
         }
 
+        int requiredSize = dir.Size(layout.Padding);
+
         if(dir.Is(layout.Layout))
-            size += layout.Gap * (layout.PanelCount - 1);
+            requiredSize += layout.Gap * (layout.PanelCount - 1);
 
-        size += dir.Size(layout.Padding);
+        size = Math.Max(dir.Min(layout), size + requiredSize);
 
-        int totalSize = Math.Max(dir.Min(layout), size);
+        dir.Min(ref units[entityIndex]) = size;
+        dir.LayoutSize(layout) = size;
 
-        dir.Min(ref units[entityIndex]) = totalSize;
-        dir.LayoutSize(layout) = totalSize;
-
-        dir.Available(ref units[entityIndex]) = totalSize - size;
+        dir.Required(ref units[entityIndex]) = requiredSize;
     }
 
-    void UpdateSize(LayoutDirection dir, ref int index) {
+    void UpdateSize(LayoutDirection dir, int index) {
         int entityIndex = index++;
 
         LayoutComponent layout = units[entityIndex].Layout;
 
-        int available = dir.Available(ref units[entityIndex]);
+        int available = dir.LayoutSize(layout) - dir.Required(ref units[entityIndex]);
 
         if(available <= 0)
             return;
 
+        LayoutEnumerator enumerator = EnumerateSubpanels(index, layout.PanelCount);
+
+        if(!dir.Is(layout.Layout)) {
+            while(enumerator.Next(out int subpanelIndex, out LayoutComponent subpanelLayout)) {
+                if(dir.Star(subpanelLayout) <= 0)
+                    continue;
+
+                dir.LayoutSize(subpanelLayout) = Math.Min(available, dir.Max(subpanelLayout));
+
+                UpdateSize(dir, subpanelIndex);
+            }
+
+            return;
+        }
+
         double stars = 0;
 
-        for(int i = 0; i < layout.PanelCount; i++) {
-            int subpanelIndex = index + i;
-
-            LayoutComponent subpanelLayout = units[subpanelIndex].Layout;
-
+        while(enumerator.Next(out int subpanelIndex, out LayoutComponent subpanelLayout)) {
             double star = dir.Star(subpanelLayout);
 
-            if(star <= 0)
-                continue;
+            if(star <= 0) {
+                available -= dir.Min(ref units[subpanelIndex]);
 
-            available += dir.Min(ref units[subpanelIndex]);
+                continue;
+            }
 
             stars += star;
         }
@@ -151,11 +160,9 @@ public sealed class LayoutEngine(App app) {
 
             stars = 0;
 
-            for(int i = 0; i < layout.PanelCount; i++) {
-                int subpanelIndex = index + i;
+            enumerator = EnumerateSubpanels(index, layout.PanelCount);
 
-                LayoutComponent subpanelLayout = units[subpanelIndex].Layout;
-
+            while(enumerator.Next(out int subpanelIndex, out LayoutComponent subpanelLayout)) {
                 double star = dir.Star(subpanelLayout);
 
                 if(star <= 0)
@@ -189,8 +196,10 @@ public sealed class LayoutEngine(App app) {
                 break;
         }
 
-        for(int i = 0; i < layout.PanelCount; i++)
-            UpdateSize(dir, ref index);
+        enumerator = EnumerateSubpanels(index, layout.PanelCount);
+
+        while(enumerator.Next(out int subpanelIndex))
+            UpdateSize(dir, subpanelIndex);
     }
 
     void UpdatePos(ref int index) {
@@ -214,5 +223,9 @@ public sealed class LayoutEngine(App app) {
 
             UpdatePos(ref index);
         }
+    }
+
+    LayoutEnumerator EnumerateSubpanels(int index, int count) {
+        return new LayoutEnumerator(units, index, count);
     }
 }
