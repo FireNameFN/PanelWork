@@ -1,6 +1,6 @@
-namespace PanelWork;
+namespace PanelWork.Entities;
 
-public static class TypeRegistry<TType> {
+public static class ComponentRegistry {
     static int index;
 
     static int softCount = 4;
@@ -9,7 +9,7 @@ public static class TypeRegistry<TType> {
 
     public static int SoftCount => softCount;
 
-    public static int GetIndex<T>() where T : TType {
+    public static int GetIndex<T>() where T : IComponent {
         return Registry<T>.Index;
     }
 
